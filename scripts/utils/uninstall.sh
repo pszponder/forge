@@ -32,6 +32,10 @@ EOF
         binary_path="$2"
         shift 2
         ;;
+      -n|--dry-run)
+        dry_run=true
+        shift
+        ;;
       -d|--dir|--directory)
         forge_dir="$2"
         shift 2
@@ -62,18 +66,30 @@ EOF
 
   print_status "$YELLOW" "🧹 Uninstalling Forge..."
 
+  if [ "${dry_run:-false}" = true ]; then
+    print_status "$YELLOW" "🔎 Dry-run enabled — no files will be deleted."
+  fi
+
   # Remove Forge binary
   if [[ -f "$binary_path" ]]; then
-    rm "$binary_path"
-    print_status "$GREEN" "✅ Removed Forge binary from $binary_path."
+    if [ "${dry_run:-false}" = true ]; then
+      print_status "$YELLOW" "ℹ️ Would remove Forge binary: $binary_path"
+    else
+      rm "$binary_path"
+      print_status "$GREEN" "✅ Removed Forge binary from $binary_path."
+    fi
   else
     print_status "$YELLOW" "⚠️ Forge binary not found at $binary_path."
   fi
 
   # Remove Forge directory
   if [[ -d "$forge_dir" ]]; then
-    rm -rf "$forge_dir"
-    print_status "$GREEN" "✅ Removed Forge directory from $forge_dir."
+    if [ "${dry_run:-false}" = true ]; then
+      print_status "$YELLOW" "ℹ️ Would remove Forge directory: $forge_dir"
+    else
+      rm -rf "$forge_dir"
+      print_status "$GREEN" "✅ Removed Forge directory from $forge_dir."
+    fi
   else
     print_status "$YELLOW" "⚠️ Forge directory not found at $forge_dir."
   fi
