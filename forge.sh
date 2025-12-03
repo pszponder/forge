@@ -9,13 +9,13 @@ source "${HOME}/.local/share/forge/scripts/utils/_utils.sh"
 # ======================
 # --- Main Execution ---
 # ======================
-clear
-print_logo
 
-# -----------------
+# -------------------
 # Command-line flags
-# -----------------
+# -------------------
 print_help() {
+    clear
+    print_logo
 	cat <<'EOF'
 USAGE: forge [OPTIONS]
 
@@ -52,26 +52,12 @@ case "$cmd" in
 		shift || true
 		uninstall_args=("$@")
 
-		# search a set of candidate locations for the uninstall helper
-		uninstall_candidates=(
-			"${HOME}/.local/share/forge/scripts/utils/uninstall.sh"
-			"${_script_dir}/scripts/utils/uninstall.sh"
-			"${_script_dir}/../scripts/utils/uninstall.sh"
-			"./scripts/utils/uninstall.sh"
-		)
-
-		found_uninstall=""
-		for c in "${uninstall_candidates[@]}"; do
-			if [ -x "$c" ]; then
-				found_uninstall="$c"
-				break
-			fi
-		done
-
-		if [ -n "$found_uninstall" ]; then
-			bash "$found_uninstall" "${uninstall_args[@]}"
+		# Known install layout — call uninstall helper at the canonical installed path
+		uninstall_helper="${HOME}/.local/share/forge/scripts/utils/uninstall.sh"
+		if [ -x "$uninstall_helper" ]; then
+			bash "$uninstall_helper" "${uninstall_args[@]}"
 		else
-			print_status "$YELLOW" "❌ uninstall helper not found. Tried: ${uninstall_candidates[*]}"
+			print_status "$YELLOW" "❌ uninstall helper not found at $uninstall_helper"
 			exit 2
 		fi
 
@@ -82,23 +68,12 @@ case "$cmd" in
 		# forward to install.sh (repo or installed)
 		shift || true
 		install_args=("$@")
-		# search candidate locations for install helper
-		install_candidates=(
-			"${HOME}/.local/share/forge/install.sh"
-			"${_script_dir}/install.sh"
-			"./install.sh"
-		)
-		found_install=""
-		for c in "${install_candidates[@]}"; do
-			if [ -x "$c" ]; then
-				found_install="$c"
-				break
-			fi
-		done
-		if [ -n "$found_install" ]; then
-			bash "$found_install" "${install_args[@]}"
+		# Known install layout — call install helper at the canonical installed path
+		install_helper="${HOME}/.local/share/forge/install.sh"
+		if [ -x "$install_helper" ]; then
+			bash "$install_helper" "${install_args[@]}"
 		else
-			print_status "$YELLOW" "❌ install helper not found. Tried: ${install_candidates[*]}"
+			print_status "$YELLOW" "❌ install helper not found at $install_helper"
 			exit 2
 		fi
 		exit $?
