@@ -36,6 +36,10 @@ EOF
         dry_run=true
         shift
         ;;
+      -f|--force|--yes)
+        force=true
+        shift
+        ;;
       -d|--dir|--directory)
         forge_dir="$2"
         shift 2
@@ -68,6 +72,30 @@ EOF
 
   if [ "${dry_run:-false}" = true ]; then
     print_status "$YELLOW" "🔎 Dry-run enabled — no files will be deleted."
+  fi
+
+  # If not dry-run and not forced, ask for interactive confirmation. If stdin isn't a TTY, require --force.
+  if [ "${dry_run:-false}" != true ] && [ "${force:-false}" != true ]; then
+    if [ ! -t 0 ]; then
+      print_status "$RED" "❌ Non-interactive shell detected — use --force to proceed in non-interactive environments."
+      return 2
+    fi
+
+    # show what will be removed
+    print_status "$YELLOW" "⚠️  About to remove the following (confirm with 'y' or 'yes'):
+  - Binary: $binary_path
+  - Directory: $forge_dir"
+
+    # prompt the user
+    read -r -p "Proceed with uninstall? [y/N]: " answer
+    case "$answer" in
+      y|Y|yes|YES)
+        ;; # continue
+      *)
+        print_status "$YELLOW" "Aborting — nothing was removed."
+        return 0
+        ;;
+    esac
   fi
 
   # Remove Forge binary
