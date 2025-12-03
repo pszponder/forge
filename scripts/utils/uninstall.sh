@@ -13,6 +13,9 @@ uninstall() {
   local dir_default="$HOME/.local/share/forge"
   local binary_path=""
   local forge_dir=""
+  # keep flag state local so repeated invocations don't leak
+  local dry_run=false
+  local force=false
 
   # Parse args (function may be called with its own args or forwarded from script: uninstall "$@")
   while [ $# -gt 0 ]; do
@@ -20,7 +23,12 @@ uninstall() {
       -h|--help)
         cat <<'EOF'
 Usage: uninstall [BINARY_PATH] [FORGE_DIR]
-       uninstall --binary BINARY_PATH --dir FORGE_DIR
+  uninstall --binary BINARY_PATH --dir FORGE_DIR
+
+Flags:
+  -n|--dry-run    Preview removals without deleting
+  -f|--force      Skip confirmation (non-interactive safe mode)
+  -h|--help       Print this help message
 
 If not provided, defaults are:
   BINARY_PATH: $HOME/.local/bin/forge
