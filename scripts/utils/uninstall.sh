@@ -3,6 +3,8 @@
 # Exit immediately if a command exits with a non-zero status
 set -eEo pipefail
 
+source ./scripts/utils/print_utils.sh
+
 uninstall() {
   # Allow optional parameters.
   # Usage:
@@ -133,4 +135,7 @@ EOF
   print_status "$GREEN" "✅ Uninstallation complete."
 }
 
-uninstall "$@"
+# If the script is executed directly (not sourced), run uninstall with any args.
+if [[ "${BASH_SOURCE[0]}" == "${0}" ]]; then
+  uninstall "$@"
+fi
