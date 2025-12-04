@@ -45,5 +45,14 @@ update() {
         return 1
     fi
 
+    # Copy the updated forge.sh to the binary location
+    if [[ -f "$repo_dir/forge.sh" && -d "$FORGE_BIN_DIR" ]]; then
+        cp "$repo_dir/forge.sh" "$FORGE_BIN_PATH"
+        chmod +x "$FORGE_BIN_PATH"
+        print_status "$GREEN" "✅ Updated forge binary at $FORGE_BIN_PATH."
+    else
+        print_status "$YELLOW" "⚠️ Could not update forge binary (forge.sh or bin directory not found)."
+    fi
+
     print_status "$GREEN" "✅ Forge updated successfully to the latest version."
 }
