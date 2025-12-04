@@ -62,6 +62,12 @@ forge_cmd_uninstall() {
 }
 forge_register_cmd "uninstall" "Uninstall forge and its data" forge_cmd_uninstall
 
+# forge update
+forge_cmd_update() {
+  update
+}
+forge_register_cmd "update" "Update forge to the latest version" forge_cmd_update
+
 # forge help
 forge_cmd_help() {
   forge_print_help
