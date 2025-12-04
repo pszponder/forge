@@ -1,0 +1,100 @@
+########################################
+# Core Build Tools
+########################################
+brew "gcc"
+brew "make"
+brew "just"
+
+########################################
+# CLI Enhancements & Utilities
+########################################
+brew "bat"
+brew "curl"
+brew "eza"
+brew "fd"
+brew "fzf"
+brew "gawk"
+brew "jq"
+brew "ripgrep"
+brew "starship"
+brew "topgrade"
+brew "trash-cli"
+brew "tree"
+brew "zoxide"
+
+########################################
+# System & Shell Tools
+########################################
+brew "btop"
+brew "direnv"
+brew "stow"
+brew "tree-sitter-cli"
+brew "zsh"
+brew "fish"
+brew "nushell"
+
+########################################
+# Dev Tools
+########################################
+brew "atuin"
+brew "clipboard"
+# brew "git"
+brew "git-delta"
+brew "gh"
+brew "lazydocker"
+brew "lazygit"
+brew "mise"
+brew "nvim"
+brew "pass"
+brew "tmux"
+brew "uv"
+brew "wget"
+brew "yazi"
+
+########################################
+# AI Tools
+########################################
+brew "aider"
+tap "charmbracelet/tap"
+brew "charmbracelet/tap/crush"
+cask "claude-code"
+brew "gemini-cli"
+brew "opencode"
+
+########################################
+# Linux Only
+########################################
+if OS.linux?
+  brew "podman"
+end
+
+########################################
+# macOS Only
+########################################
+if OS.mac?
+  cask "raycast"
+
+  cask "brave-browser"
+  cask "google-chrome"
+
+  cask "ghostty"
+  cask "warp"
+
+  cask "obsidian"
+  cask "visual-studio-code"
+  cask "zed"
+
+  cask "podman-desktop"
+
+  # https://formulae.brew.sh/cask-font/
+  tap "homebrew/cask-fonts"
+  # cask "font-blex-mono-nerd-font"
+  cask "font-caskaydia-cove-nerd-font"
+  cask "font-caskaydia-mono-nerd-font"
+  cask "font-fira-code-nerd-font"
+  cask "font-fira-mono-nerd-font"
+  cask "font-hack-nerd-font"
+  cask "font-jetbrains-mono-nerd-font"
+  cask "font-meslo-lg-nerd-font"
+  # cask "font-terminess-ttf-nerd-font"
+end
