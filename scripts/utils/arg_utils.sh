@@ -16,6 +16,12 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
   declare -A FORGE_CMD_OPTS_DESC
   declare -A FORGE_CMD_OPTS_LIST
 
+  # Command aliases
+  # FORGE_ALIAS_TARGET["alias"] = "canonical_cmd"
+  # FORGE_CMD_ALIAS_LIST["canonical_cmd"] = "alias1 alias2"
+  declare -A FORGE_ALIAS_TARGET
+  declare -A FORGE_CMD_ALIAS_LIST
+
   # forge_register_cmd <name> <description> <handler-func-name>
   forge_register_cmd() {
     local name="$1"
@@ -43,6 +49,33 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
     fi
   }
 
+  # forge_register_cmd_alias <alias> <target_cmd>
+  forge_register_cmd_alias() {
+    local alias="$1"
+    local target="$2"
+
+    local func="${FORGE_CMDS_FUNC["$target"]}"
+    local desc="${FORGE_CMDS_DESC["$target"]}"
+
+    if [[ -z "$func" ]]; then
+      echo "forge_register_cmd_alias: unknown target command '$target'" >&2
+      return 1
+    fi
+
+    # Alias shares the same handler and description
+    FORGE_CMDS_FUNC["$alias"]="$func"
+    FORGE_CMDS_DESC["$alias"]="$desc"
+    FORGE_CMDS_LIST+=("$alias")
+
+    # Track alias mapping for help output
+    FORGE_ALIAS_TARGET["$alias"]="$target"
+
+    local list="${FORGE_CMD_ALIAS_LIST["$target"]}"
+    if [[ " $list " != *" $alias "* ]]; then
+      FORGE_CMD_ALIAS_LIST["$target"]="${list:+$list }$alias"
+    fi
+  }
+
   # forge_run_cmd <name> [args...]
   forge_run_cmd() {
     local name="$1"; shift || true
@@ -63,6 +96,11 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
     echo
     echo "Commands:"
     for name in "${FORGE_CMDS_LIST[@]}"; do
+      # Skip aliases here; they are listed under their canonical command
+      if [[ -n "${FORGE_ALIAS_TARGET["$name"]+x}" ]]; then
+        continue
+      fi
+
       printf "  %-15s %s\n" "$name" "${FORGE_CMDS_DESC["$name"]}"
 
       # Print any registered options for this command
@@ -73,6 +111,12 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
           local desc="${FORGE_CMD_OPTS_DESC["$key"]}"
           printf "    %-17s %s\n" "$flag" "$desc"
         done
+      fi
+
+      # Print any registered aliases for this command
+      local aliases="${FORGE_CMD_ALIAS_LIST["$name"]}"
+      if [[ -n "$aliases" ]]; then
+        printf "    %-17s %s\n" "aliases:" "$aliases"
       fi
     done
   }
