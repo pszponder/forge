@@ -33,6 +33,10 @@ source "$FORGE_ROOT/scripts/utils/_utils.sh"
 # --------------------------------------------------------------------------------------
 
 # forge install
+#
+# Behavior:
+#   forge install              -> full system install
+#   forge install --dotfiles   -> dotfiles only install
 forge_cmd_install() {
   local sub_arg="${1:-}"
 
@@ -63,10 +67,44 @@ forge_cmd_uninstall() {
 forge_register_cmd "uninstall" "Uninstall forge and its data" forge_cmd_uninstall
 
 # forge update
+#
+# Behavior:
+#   forge update              -> run topgrade (system + tools update)
+#   forge update --self       -> update forge itself (repo + binary)
+#   forge update --dotfiles   -> update managed dotfiles (TODO)
 forge_cmd_update() {
-  update
+  local sub_arg="${1:-}"
+
+  case "$sub_arg" in
+    "")
+      # Default: delegate to topgrade if available
+      if command -v topgrade >/dev/null 2>&1; then
+        print_status "$BLUE" "Running topgrade to update system and tools..."
+        topgrade
+      else
+        print_status "$RED" "❌ 'topgrade' command not found. Please install topgrade first."
+        return 1
+      fi
+      ;;
+    --self)
+      print_status "$BLUE" "Updating forge CLI and repository..."
+      update
+      ;;
+    --dotfiles)
+      print_status "$BLUE" "Updating dotfiles (TODO: implement dotfiles update logic)."
+      # TODO: call your dotfiles update workflow here
+      ;;
+    *)
+      print_status "$RED" "Unknown option for 'update': $sub_arg"
+      echo
+      forge_print_help
+      return 1
+      ;;
+  esac
 }
-forge_register_cmd "update" "Update forge to the latest version" forge_cmd_update
+forge_register_cmd "update" "Update system, forge, and related resources" forge_cmd_update
+forge_register_cmd_opt "update" "--self" "Update the forge CLI and repository"
+forge_register_cmd_opt "update" "--dotfiles" "Update managed dotfiles"
 forge_register_cmd_alias "up" "update"
 forge_register_cmd_alias "u" "update"
 
