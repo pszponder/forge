@@ -38,6 +38,7 @@ brew "nushell"
 ########################################
 brew "atuin"
 brew "clipboard"
+brew "figlet"
 # brew "git"
 brew "git-delta"
 brew "gh"
