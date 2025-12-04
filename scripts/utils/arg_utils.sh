@@ -5,22 +5,98 @@
 if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
   FORGE_ARG_UTILS_LOADED=1
 
-  # Requires bash 4+ for associative arrays
-  declare -A FORGE_CMDS_DESC
-  declare -A FORGE_CMDS_FUNC
-  FORGE_CMDS_LIST=()
+  # NOTE: This implementation is compatible with bash 3.2.
+  # It intentionally avoids associative arrays and uses simple
+  # indexed arrays plus linear lookups instead.
 
-  # Per-command option descriptions
-  # FORGE_CMD_OPTS_DESC["<cmd>|<flag>"] = "description"
-  # FORGE_CMD_OPTS_LIST["<cmd>"] = "--flag1 --flag2"
-  declare -A FORGE_CMD_OPTS_DESC
-  declare -A FORGE_CMD_OPTS_LIST
+  # Registered commands (kept in parallel arrays)
+  #   FORGE_CMD_NAMES[i] = name
+  #   FORGE_CMD_DESCS[i] = description
+  #   FORGE_CMD_FUNCS[i] = handler function name
+  FORGE_CMD_NAMES=()
+  FORGE_CMD_DESCS=()
+  FORGE_CMD_FUNCS=()
 
-  # Command aliases
-  # FORGE_ALIAS_TARGET["alias"] = "canonical_cmd"
-  # FORGE_CMD_ALIAS_LIST["canonical_cmd"] = "alias1 alias2"
-  declare -A FORGE_ALIAS_TARGET
-  declare -A FORGE_CMD_ALIAS_LIST
+  # Per-command options (parallel arrays)
+  #   FORGE_OPT_CMDS[i]  = command name
+  #   FORGE_OPT_FLAGS[i] = flag (e.g. --help)
+  #   FORGE_OPT_DESCS[i] = description
+  FORGE_OPT_CMDS=()
+  FORGE_OPT_FLAGS=()
+  FORGE_OPT_DESCS=()
+
+  # Command aliases (parallel arrays)
+  #   FORGE_ALIAS_ALIASES[i] = alias name
+  #   FORGE_ALIAS_TARGETS[i] = canonical command name
+  FORGE_ALIAS_ALIASES=()
+  FORGE_ALIAS_TARGETS=()
+
+  # Internal helpers ---------------------------------------------------------
+
+  forge__find_cmd_index() {
+    # forge__find_cmd_index <name>
+    # echo index on stdout, or -1 if not found
+    local search="$1"
+    local i
+    for i in "${!FORGE_CMD_NAMES[@]}"; do
+      if [[ "${FORGE_CMD_NAMES[$i]}" == "$search" ]]; then
+        echo "$i"
+        return 0
+      fi
+    done
+    echo "-1"
+    return 1
+  }
+
+  forge__is_alias() {
+    # forge__is_alias <name>
+    local name="$1"
+    local i
+    for i in "${!FORGE_ALIAS_ALIASES[@]}"; do
+      if [[ "${FORGE_ALIAS_ALIASES[$i]}" == "$name" ]]; then
+        return 0
+      fi
+    done
+    return 1
+  }
+
+  forge__aliases_for_cmd() {
+    # forge__aliases_for_cmd <cmd>
+    # echo space-separated aliases for the canonical command
+    local cmd="$1"
+    local i
+    local result=""
+    for i in "${!FORGE_ALIAS_ALIASES[@]}"; do
+      if [[ "${FORGE_ALIAS_TARGETS[$i]}" == "$cmd" ]]; then
+        if [[ -z "$result" ]]; then
+          result="${FORGE_ALIAS_ALIASES[$i]}"
+        else
+          result+=" ${FORGE_ALIAS_ALIASES[$i]}"
+        fi
+      fi
+    done
+    echo "$result"
+  }
+
+  forge__opts_for_cmd() {
+    # forge__opts_for_cmd <cmd>
+    # echo indices (space-separated) into FORGE_OPT_* arrays
+    local cmd="$1"
+    local i
+    local indices=""
+    for i in "${!FORGE_OPT_CMDS[@]}"; do
+      if [[ "${FORGE_OPT_CMDS[$i]}" == "$cmd" ]]; then
+        if [[ -z "$indices" ]]; then
+          indices="$i"
+        else
+          indices+=" $i"
+        fi
+      fi
+    done
+    echo "$indices"
+  }
+
+  # Public API ---------------------------------------------------------------
 
   # forge_register_cmd <name> <description> <handler-func-name>
   forge_register_cmd() {
@@ -28,9 +104,9 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
     local desc="$2"
     local func="$3"
 
-    FORGE_CMDS_DESC["$name"]="$desc"
-    FORGE_CMDS_FUNC["$name"]="$func"
-    FORGE_CMDS_LIST+=("$name")
+    FORGE_CMD_NAMES+=("$name")
+    FORGE_CMD_DESCS+=("$desc")
+    FORGE_CMD_FUNCS+=("$func")
   }
 
   # forge_register_cmd_opt <cmd> <flag> <description>
@@ -39,14 +115,17 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
     local flag="$2"
     local desc="$3"
 
-    local key="${cmd}|${flag}"
-    FORGE_CMD_OPTS_DESC["$key"]="$desc"
+    # Avoid duplicates for the same <cmd, flag>
+    local i
+    for i in "${!FORGE_OPT_CMDS[@]}"; do
+      if [[ "${FORGE_OPT_CMDS[$i]}" == "$cmd" && "${FORGE_OPT_FLAGS[$i]}" == "$flag" ]]; then
+        return 0
+      fi
+    done
 
-    # Append to list preserving order, avoid duplicates
-    local list="${FORGE_CMD_OPTS_LIST["$cmd"]}"
-    if [[ " $list " != *" $flag "* ]]; then
-      FORGE_CMD_OPTS_LIST["$cmd"]="${list:+$list }$flag"
-    fi
+    FORGE_OPT_CMDS+=("$cmd")
+    FORGE_OPT_FLAGS+=("$flag")
+    FORGE_OPT_DESCS+=("$desc")
   }
 
   # forge_register_cmd_alias <alias> <target_cmd>
@@ -54,40 +133,41 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
     local alias="$1"
     local target="$2"
 
-    local func="${FORGE_CMDS_FUNC["$target"]}"
-    local desc="${FORGE_CMDS_DESC["$target"]}"
-
-    if [[ -z "$func" ]]; then
+    # Look up the target command
+    local idx
+    idx="$(forge__find_cmd_index "$target")" || true
+    if [[ "$idx" == "-1" ]]; then
       echo "forge_register_cmd_alias: unknown target command '$target'" >&2
       return 1
     fi
 
-    # Alias shares the same handler and description
-    FORGE_CMDS_FUNC["$alias"]="$func"
-    FORGE_CMDS_DESC["$alias"]="$desc"
-    FORGE_CMDS_LIST+=("$alias")
+    local func="${FORGE_CMD_FUNCS[$idx]}"
+    local desc="${FORGE_CMD_DESCS[$idx]}"
+
+    # Register alias as its own entry so forge_run_cmd can find it
+    FORGE_CMD_NAMES+=("$alias")
+    FORGE_CMD_DESCS+=("$desc")
+    FORGE_CMD_FUNCS+=("$func")
 
     # Track alias mapping for help output
-    FORGE_ALIAS_TARGET["$alias"]="$target"
-
-    local list="${FORGE_CMD_ALIAS_LIST["$target"]}"
-    if [[ " $list " != *" $alias "* ]]; then
-      FORGE_CMD_ALIAS_LIST["$target"]="${list:+$list }$alias"
-    fi
+    FORGE_ALIAS_ALIASES+=("$alias")
+    FORGE_ALIAS_TARGETS+=("$target")
   }
 
   # forge_run_cmd <name> [args...]
   forge_run_cmd() {
     local name="$1"; shift || true
-    local func="${FORGE_CMDS_FUNC["$name"]}"
 
-    if [[ -z "$func" ]]; then
+    local idx
+    idx="$(forge__find_cmd_index "$name")" || true
+    if [[ "$idx" == "-1" ]]; then
       echo "Unknown command: $name" >&2
       echo >&2
       forge_print_help
       return 1
     fi
 
+    local func="${FORGE_CMD_FUNCS[$idx]}"
     "$func" "$@"
   }
 
@@ -95,29 +175,45 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
     echo "Usage: forge <command> [options]"
     echo
     echo "Commands:"
-    for name in "${FORGE_CMDS_LIST[@]}"; do
+
+    local i
+    for i in "${!FORGE_CMD_NAMES[@]}"; do
+      local name="${FORGE_CMD_NAMES[$i]}"
+
       # Skip aliases here; they are listed under their canonical command
-      if [[ -n "${FORGE_ALIAS_TARGET["$name"]+x}" ]]; then
+      if forge__is_alias "$name"; then
         continue
       fi
 
-      printf "  %-15s %s\n" "$name" "${FORGE_CMDS_DESC["$name"]}"
+      local desc="${FORGE_CMD_DESCS[$i]}"
+      printf "  %-15s %s\n" "$name" "$desc"
 
       # Print any registered options for this command
-      local opts="${FORGE_CMD_OPTS_LIST["$name"]}"
-      if [[ -n "$opts" ]]; then
-        for flag in $opts; do
-          local key="${name}|${flag}"
-          local desc="${FORGE_CMD_OPTS_DESC["$key"]}"
-          printf "    %-17s %s\n" "$flag" "$desc"
+      local opt_indices
+      opt_indices="$(forge__opts_for_cmd "$name")"
+      if [[ -n "$opt_indices" ]]; then
+        local idx_opt
+        for idx_opt in $opt_indices; do
+          local flag="${FORGE_OPT_FLAGS[$idx_opt]}"
+          local odesc="${FORGE_OPT_DESCS[$idx_opt]}"
+          printf "    %-17s %s\n" "$flag" "$odesc"
         done
       fi
 
       # Print any registered aliases for this command
-      local aliases="${FORGE_CMD_ALIAS_LIST["$name"]}"
+      local aliases
+      aliases="$(forge__aliases_for_cmd "$name")"
       if [[ -n "$aliases" ]]; then
-        # Stored as space-separated list; present as comma-separated
-        local pretty_aliases="${aliases// /, }"
+        # Present as comma-separated list for readability
+        local pretty_aliases=""
+        local alias_name
+        for alias_name in $aliases; do
+          if [[ -z "$pretty_aliases" ]]; then
+            pretty_aliases="$alias_name"
+          else
+            pretty_aliases+=", $alias_name"
+          fi
+        done
         printf "    %-17s %s\n" "aliases:" "$pretty_aliases"
       fi
     done
