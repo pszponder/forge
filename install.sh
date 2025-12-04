@@ -7,6 +7,9 @@ set -eEo pipefail
 source ./scripts/config.sh
 source ./scripts/utils/_utils.sh
 
+clear
+print_logo
+
 install_git
 clone_repo "$FORGE_REPO" "$FORGE_DATA_DIR"
 checkout_git_branch "$FORGE_DATA_DIR" "$FORGE_BRANCH"
