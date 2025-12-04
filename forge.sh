@@ -26,11 +26,13 @@ source "$FORGE_ROOT/scripts/config.sh"
 # shellcheck disable=SC1090
 source "$FORGE_ROOT/scripts/utils/_utils.sh"
 
-# ---------------
+# --------------------------------------------------------------------------------------
 # Subcommand handlers
-# ---------------
+# Register commands (name, description, handler-function)
+# Optionally register per-command options for help output (command, option, description)
+# --------------------------------------------------------------------------------------
 
-# forge install [--dotfiles]
+# forge install
 forge_cmd_install() {
   local sub_arg="${1:-}"
 
@@ -51,25 +53,24 @@ forge_cmd_install() {
       ;;
   esac
 }
+forge_register_cmd "install" "Setup new system" forge_cmd_install
+forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
 
 # forge uninstall
 forge_cmd_uninstall() {
   uninstall
 }
+forge_register_cmd "uninstall" "Uninstall forge and its data" forge_cmd_uninstall
 
 # forge help
 forge_cmd_help() {
   forge_print_help
 }
+forge_register_cmd "help" "Show help" forge_cmd_help
 
-# Register commands (name, description, handler-function)
-forge_register_cmd "install"   "Install forge (use --dotfiles for dotfiles only)" forge_cmd_install
-forge_register_cmd "uninstall" "Uninstall forge and its data"                     forge_cmd_uninstall
-forge_register_cmd "help"      "Show help"                                       forge_cmd_help
-
-# Register per-command options for help output
-forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
-
+# ======================
+# --- Main Execution ---
+# ======================
 main() {
   local cmd="$1"; shift || true
 
@@ -82,8 +83,5 @@ main() {
   forge_run_cmd "$cmd" "$@"
 }
 
-# ======================
-# --- Main Execution ---
-# ======================
 # clear
 main "$@"
