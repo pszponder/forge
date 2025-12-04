@@ -4,17 +4,17 @@
 set -eEo pipefail
 
 # Source Dependencies
+source ./scripts/config.sh
 source ./scripts/utils/_utils.sh
 
-# Define Variables
-FORGE_REPO="pszponder/forge"
-FORGE_BRANCH="main"
-FORGE_DIR="$HOME/.local/share/forge"
-
 install_git
-clone_repo "$FORGE_REPO" "$FORGE_DIR"
-checkout_git_branch "$FORGE_DIR" "$FORGE_BRANCH"
+clone_repo "$FORGE_REPO" "$FORGE_DATA_DIR"
+checkout_git_branch "$FORGE_DATA_DIR" "$FORGE_BRANCH"
 
-# TODO: move forge shell script to ~/.local/bin and make it executable and ensure that forge can still reference ~/.local/share/forge
-cp "$FORGE_DIR/forge.sh" "$HOME/.local/bin/forge"
-chmod +x "$HOME/.local/bin/forge"
+# Install Forge Script
+print_status "$YELLOW" "Installing forge script to $FORGE_BIN_PATH..."
+mkdir -p "$FORGE_BIN_DIR"
+cp "$FORGE_DATA_DIR/forge.sh" "$FORGE_BIN_PATH"
+chmod +x "$FORGE_BIN_PATH"
+
+print_status "$GREEN" "✅ Forge installed successfully!"
