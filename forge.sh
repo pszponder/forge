@@ -68,6 +68,8 @@ forge_cmd_update() {
 }
 forge_register_cmd "update" "Update forge to the latest version" forge_cmd_update
 forge_register_cmd_alias "up" "update"
+forge_register_cmd_alias "u" "update"
+
 
 # forge help
 forge_cmd_help() {

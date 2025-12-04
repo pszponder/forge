@@ -116,7 +116,9 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
       # Print any registered aliases for this command
       local aliases="${FORGE_CMD_ALIAS_LIST["$name"]}"
       if [[ -n "$aliases" ]]; then
-        printf "    %-17s %s\n" "aliases:" "$aliases"
+        # Stored as space-separated list; present as comma-separated
+        local pretty_aliases="${aliases// /, }"
+        printf "    %-17s %s\n" "aliases:" "$pretty_aliases"
       fi
     done
   }
