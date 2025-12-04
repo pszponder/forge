@@ -63,14 +63,18 @@ forge_cmd_help() {
 }
 
 # Register commands (name, description, handler-function)
-forge_register_cmd "install"   "Install full system (use --dotfiles for dotfiles only)" forge_cmd_install
+forge_register_cmd "install"   "Install forge (use --dotfiles for dotfiles only)" forge_cmd_install
 forge_register_cmd "uninstall" "Uninstall forge and its data"                     forge_cmd_uninstall
-forge_register_cmd "help"      "Show help"                                        forge_cmd_help
+forge_register_cmd "help"      "Show help"                                       forge_cmd_help
+
+# Register per-command options for help output
+forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
 
 main() {
   local cmd="$1"; shift || true
 
   if [[ -z "$cmd" || "$cmd" == "-h" || "$cmd" == "--help" ]]; then
+    print_logo
     forge_print_help
     exit 0
   fi
@@ -81,6 +85,5 @@ main() {
 # ======================
 # --- Main Execution ---
 # ======================
-clear
-print_logo
+# clear
 main "$@"

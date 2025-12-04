@@ -10,6 +10,12 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
   declare -A FORGE_CMDS_FUNC
   FORGE_CMDS_LIST=()
 
+  # Per-command option descriptions
+  # FORGE_CMD_OPTS_DESC["<cmd>|<flag>"] = "description"
+  # FORGE_CMD_OPTS_LIST["<cmd>"] = "--flag1 --flag2"
+  declare -A FORGE_CMD_OPTS_DESC
+  declare -A FORGE_CMD_OPTS_LIST
+
   # forge_register_cmd <name> <description> <handler-func-name>
   forge_register_cmd() {
     local name="$1"
@@ -19,6 +25,22 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
     FORGE_CMDS_DESC["$name"]="$desc"
     FORGE_CMDS_FUNC["$name"]="$func"
     FORGE_CMDS_LIST+=("$name")
+  }
+
+  # forge_register_cmd_opt <cmd> <flag> <description>
+  forge_register_cmd_opt() {
+    local cmd="$1"
+    local flag="$2"
+    local desc="$3"
+
+    local key="${cmd}|${flag}"
+    FORGE_CMD_OPTS_DESC["$key"]="$desc"
+
+    # Append to list preserving order, avoid duplicates
+    local list="${FORGE_CMD_OPTS_LIST["$cmd"]}"
+    if [[ " $list " != *" $flag "* ]]; then
+      FORGE_CMD_OPTS_LIST["$cmd"]="${list:+$list }$flag"
+    fi
   }
 
   # forge_run_cmd <name> [args...]
@@ -42,6 +64,16 @@ if [[ -z "${FORGE_ARG_UTILS_LOADED:-}" ]]; then
     echo "Commands:"
     for name in "${FORGE_CMDS_LIST[@]}"; do
       printf "  %-15s %s\n" "$name" "${FORGE_CMDS_DESC["$name"]}"
+
+      # Print any registered options for this command
+      local opts="${FORGE_CMD_OPTS_LIST["$name"]}"
+      if [[ -n "$opts" ]]; then
+        for flag in $opts; do
+          local key="${name}|${flag}"
+          local desc="${FORGE_CMD_OPTS_DESC["$key"]}"
+          printf "    %-17s %s\n" "$flag" "$desc"
+        done
+      fi
     done
   }
 fi
