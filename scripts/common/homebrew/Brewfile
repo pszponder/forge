@@ -1,69 +1,56 @@
 ########################################
-# Core Build Tools
+# Packages & Utilities (common)
 ########################################
-brew "gcc"
-brew "make"
-brew "just"
 
-########################################
-# CLI Enhancements & Utilities
-########################################
+brew "atuin"
 brew "bat"
+brew "btop"
+brew "clipboard"
 brew "curl"
+brew "direnv"
 brew "eza"
 brew "fd"
+brew "figlet"
+brew "fish"
 brew "fzf"
 brew "gawk"
-brew "jq"
-brew "ripgrep"
-brew "starship"
-brew "topgrade"
-brew "trash-cli"
-brew "tree"
-brew "zoxide"
-
-########################################
-# System & Shell Tools
-########################################
-brew "btop"
-brew "direnv"
-brew "stow"
-brew "tree-sitter-cli"
-brew "zsh"
-brew "fish"
-brew "nushell"
-
-########################################
-# Dev Tools
-########################################
-brew "atuin"
-brew "clipboard"
-brew "figlet"
+brew "gcc"
 # brew "git"
 brew "git-delta"
 brew "gh"
+brew "just"
+brew "jq"
 brew "lazydocker"
 brew "lazygit"
+brew "make"
 brew "mise"
+brew "nushell"
 brew "nvim"
 brew "pass"
+brew "ripgrep"
+brew "starship"
+brew "stow"
 brew "tmux"
+brew "topgrade"
+brew "trash-cli"
+brew "tree"
+brew "tree-sitter-cli"
 brew "uv"
 brew "wget"
 brew "yazi"
+brew "zoxide"
+brew "zsh"
 
-########################################
-# AI Tools
-########################################
+# AI / coding assistants
 brew "aider"
-tap "charmbracelet/tap"
+tap  "charmbracelet/tap"
 brew "charmbracelet/tap/crush"
 cask "claude-code"
 brew "gemini-cli"
 brew "opencode"
 
 ########################################
-# Linux Only
+#+ Platform-specific (leave as-is)
 ########################################
 if OS.linux?
   brew "podman"
@@ -88,7 +75,7 @@ if OS.mac?
   cask "podman-desktop"
 
   # https://formulae.brew.sh/cask-font/
-  tap "homebrew/cask-fonts"
+  tap  "homebrew/cask-fonts"
   # cask "font-blex-mono-nerd-font"
   cask "font-caskaydia-cove-nerd-font"
   cask "font-caskaydia-mono-nerd-font"
