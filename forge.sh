@@ -24,6 +24,7 @@ fi
 source "$FORGE_ROOT/config.sh"
 source "$FORGE_ROOT/scripts/utils/_utils.sh"
 source "$FORGE_ROOT/scripts/common/dotfiles.sh"
+source "$FORGE_ROOT/scripts/common/homebrew/homebrew_lib.sh"
 
 # --------------------------------------------------------------------------------------
 # Subcommand handlers
@@ -34,18 +35,26 @@ source "$FORGE_ROOT/scripts/common/dotfiles.sh"
 # forge install
 #
 # Behavior:
-#   forge install              -> full system install
-#   forge install --all        -> explicit full system install
-#   forge install --dotfiles   -> dotfiles only install
+#   forge install                -> full system install (Homebrew + Brewfile + dotfiles)
+#   forge install --all          -> explicit full system install
+#   forge install --brew         -> install Homebrew and Brewfile packages only
+#   forge install --dotfiles     -> dotfiles only install
 forge_cmd_install() {
   local sub_arg="${1:-}"
 
   case "$sub_arg" in
     ""|--all)
-        # TODO: add more installation steps here in the future (in the correct order)
+        print_status "$BLUE" "Installing Homebrew (if needed) and Brewfile packages..."
+        forge_brew_install ""
+        print_status "$BLUE" "Installing dotfiles..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
+    --brew)
+        print_status "$BLUE" "Installing Homebrew (if needed) and Brewfile packages..."
+        forge_brew_install ""
+        ;;
     --dotfiles)
+        print_status "$BLUE" "Installing dotfiles only..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     *)
@@ -57,16 +66,18 @@ forge_cmd_install() {
   esac
 }
 forge_register_cmd "install" "Setup new system" forge_cmd_install
-forge_register_cmd_opt "install" "--all" "Install full system (dotfiles, packages, etc.)"
+forge_register_cmd_opt "install" "--all" "Install full system (Homebrew, Brewfile, dotfiles)"
+forge_register_cmd_opt "install" "--brew" "Install Homebrew and Brewfile packages only"
 forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
 
 # forge update
 #
 # Behavior:
-#   forge update              -> run topgrade (system + tools update)
-#   forge update --all        -> full update (system + forge + dotfiles)
-#   forge update --self       -> update forge itself (repo + binary)
-#   forge update --dotfiles   -> update managed dotfiles only
+#   forge update                -> run topgrade (system + tools update)
+#   forge update --all          -> full update (system + Homebrew + Forge + dotfiles)
+#   forge update --brew         -> update Homebrew and Brewfile packages only
+#   forge update --self         -> update forge itself (repo + binary)
+#   forge update --dotfiles     -> update managed dotfiles only
 forge_cmd_update() {
   local sub_arg="${1:-}"
 
@@ -82,20 +93,30 @@ forge_cmd_update() {
         fi
         ;;
     --all)
-        # Full update: system + forge + dotfiles
+        # Full update: system + Homebrew + Forge + dotfiles
         if command -v topgrade >/dev/null 2>&1; then
             print_status "$BLUE" "Running topgrade to update system and tools..."
             topgrade
         else
             print_status "$YELLOW" "⚠️ 'topgrade' not found; skipping system/tools update."
         fi
-        update_dotfiles "$DOTFILES_DIR" "$DOTFILES_BRANCH"
-        update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH"
+        print_status "$BLUE" "Updating Homebrew and Brewfile packages..."
+        forge_brew_update "" || return 1
+        print_status "$BLUE" "Updating Forge CLI and repository..."
+        update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH" || return 1
+        print_status "$BLUE" "Updating dotfiles..."
+        update_dotfiles "$DOTFILES_DIR" "$DOTFILES_BRANCH" || return 1
+        ;;
+    --brew)
+        print_status "$BLUE" "Updating Homebrew and Brewfile packages..."
+        forge_brew_update ""
         ;;
     --self)
+        print_status "$BLUE" "Updating Forge CLI and repository..."
         update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH"
         ;;
     --dotfiles)
+        print_status "$BLUE" "Updating dotfiles..."
         update_dotfiles "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     *)
@@ -107,7 +128,8 @@ forge_cmd_update() {
   esac
 }
 forge_register_cmd "update" "Update system, forge, and related resources" forge_cmd_update
-forge_register_cmd_opt "update" "--all" "Run full update (system, forge, and dotfiles)"
+forge_register_cmd_opt "update" "--all" "Run full update (system, Homebrew, forge, and dotfiles)"
+forge_register_cmd_opt "update" "--brew" "Update Homebrew and Brewfile packages only"
 forge_register_cmd_opt "update" "--self" "Update the forge CLI and repository"
 forge_register_cmd_opt "update" "--dotfiles" "Update managed dotfiles only"
 forge_register_cmd_alias "up" "update"
@@ -116,17 +138,18 @@ forge_register_cmd_alias "u" "update"
 # forge uninstall
 #
 # Behavior:
-#   forge uninstall           -> full uninstall (forge + dotfiles)
-#   forge uninstall --all     -> explicit full uninstall
-#   forge uninstall --self    -> uninstall forge CLI and data only
-#   forge uninstall --dotfiles-> uninstall managed dotfiles only
+#   forge uninstall             -> full uninstall of Forge and dotfiles (Homebrew untouched)
+#   forge uninstall --all       -> explicit full uninstall (Forge + dotfiles, Homebrew untouched)
+#   forge uninstall --self      -> uninstall forge CLI and data only
+#   forge uninstall --dotfiles  -> uninstall managed dotfiles only
+#   forge uninstall --brew      -> uninstall Homebrew and all Homebrew-managed packages
 forge_cmd_uninstall() {
   local sub_arg="${1:-}"
 
   case "$sub_arg" in
     ""|--all)
-        print_status "$BLUE" "Uninstalling forge CLI, dotfiles, data, and managed dotfiles..."
-        read -rp "Are you sure you want to uninstall everything? This action cannot be undone. (y/N): " confirm
+        print_status "$BLUE" "Uninstalling forge CLI, data, and managed dotfiles (Homebrew will be left installed)..."
+        read -rp "Are you sure you want to uninstall Forge and its dotfiles? This action cannot be undone. (y/N): " confirm
         if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
             print_status "$YELLOW" "Uninstall cancelled."
             return 0
@@ -142,6 +165,10 @@ forge_cmd_uninstall() {
         print_status "$BLUE" "Uninstalling managed dotfiles..."
         uninstall_dotfiles "$DOTFILES_DIR"
         ;;
+    --brew)
+        print_status "$BLUE" "Uninstalling Homebrew and all Homebrew-managed packages..."
+        forge_brew_uninstall ""
+        ;;
     *)
         print_status "$RED" "Unknown option for 'uninstall': $sub_arg"
         echo
@@ -151,9 +178,10 @@ forge_cmd_uninstall() {
   esac
 }
 forge_register_cmd "uninstall" "Uninstall forge and related resources" forge_cmd_uninstall
-forge_register_cmd_opt "uninstall" "--all" "Uninstall forge CLI, data, and dotfiles"
+forge_register_cmd_opt "uninstall" "--all" "Uninstall forge CLI, data, and dotfiles (Homebrew left installed)"
 forge_register_cmd_opt "uninstall" "--self" "Uninstall only the forge CLI and data"
 forge_register_cmd_opt "uninstall" "--dotfiles" "Uninstall managed dotfiles only"
+forge_register_cmd_opt "uninstall" "--brew" "Uninstall Homebrew and all Homebrew-managed packages"
 
 # forge help
 forge_cmd_help() {
