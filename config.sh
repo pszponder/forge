@@ -1,5 +1,6 @@
-# Centralized configuration for Forge scripts.
-# Source this file from any Forge script to access common config values.
+# Centralized configuration for Forge runtime and installer.
+# This file is sourced directly by forge.sh and install.sh; other scripts
+# receive any needed values via function arguments from those entrypoints.
 
 # Installation directories
 export FORGE_BIN_DIR="${HOME}/.local/bin"
