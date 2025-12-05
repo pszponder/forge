@@ -34,7 +34,7 @@ source "$FORGE_ROOT/scripts/common/dotfiles.sh"
 # forge install
 #
 # Behavior:
-#   forge install              -> full system install (currently dotfiles)
+#   forge install              -> full system install
 #   forge install --all        -> explicit full system install
 #   forge install --dotfiles   -> dotfiles only install
 forge_cmd_install() {
@@ -42,12 +42,10 @@ forge_cmd_install() {
 
   case "$sub_arg" in
     ""|--all)
-        print_status "$BLUE" "Installing full system (dotfiles and other managed resources)..."
-        # For now, "full" means dotfiles; expand here as more components are added.
+        # TODO: add more installation steps here in the future (in the correct order)
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     --dotfiles)
-        print_status "$BLUE" "Installing dotfiles only..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     *)
@@ -91,17 +89,13 @@ forge_cmd_update() {
         else
             print_status "$YELLOW" "⚠️ 'topgrade' not found; skipping system/tools update."
         fi
-        print_status "$BLUE" "Updating forge CLI and repository..."
-        update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH"
-        print_status "$BLUE" "Updating dotfiles..."
         update_dotfiles "$DOTFILES_DIR" "$DOTFILES_BRANCH"
+        update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH"
         ;;
     --self)
-        print_status "$BLUE" "Updating forge CLI and repository..."
         update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH"
         ;;
     --dotfiles)
-        print_status "$BLUE" "Updating dotfiles..."
         update_dotfiles "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     *)
@@ -131,9 +125,14 @@ forge_cmd_uninstall() {
 
   case "$sub_arg" in
     ""|--all)
-        print_status "$BLUE" "Uninstalling forge CLI, data, and managed dotfiles..."
-        uninstall "$FORGE_BIN_PATH" "$FORGE_DATA_DIR"
+        print_status "$BLUE" "Uninstalling forge CLI, dotfiles, data, and managed dotfiles..."
+        read -rp "Are you sure you want to uninstall everything? This action cannot be undone. (y/N): " confirm
+        if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
+            print_status "$YELLOW" "Uninstall cancelled."
+            return 0
+        fi
         uninstall_dotfiles "$DOTFILES_DIR"
+        uninstall "$FORGE_BIN_PATH" "$FORGE_DATA_DIR"
         ;;
     --self)
         print_status "$BLUE" "Uninstalling forge CLI and repository..."
