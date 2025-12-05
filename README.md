@@ -35,3 +35,18 @@ forge update --self
 - [Typecraft's Crucible](https://github.com/typecraft-dev/crucible)
 - [dcli - Declarative package management CLI tool for Arch Linux](https://gitlab.com/theblackdon/dcli)
 - [Omarchy](https://github.com/basecamp/omarchy)
+
+## Todos
+- [ ] Tool should be modular and have options for:
+    - [ ] Asking user for what os is being used
+    - [ ] Asking user for what type of system (server or workstation)
+    - [ ] Installing packages
+    - [ ] Installing dotfiles
+    - [ ] Setup SSH Keys
+- [ ] Can we replace Brew with Mise?
+- [ ] add a "setup" option for
+    - [ ] --brew
+    - [ ] --flatpak
+    - [ ] --ssh
+    - [ ] --mise ???
+- [ ] Try using VSCode plan mode when developing the tool
