@@ -13,6 +13,7 @@ export FORGE_BRANCH="main"
 
 # Dotfiles info
 export DOTFILES_REPO="pszponder/dotfiles"
+export DOTFILES_BRANCH="main"
 export DOTFILES_DIR="${HOME}/Development/repos/github/pszponder/dotfiles"
 
 # Ensure directories are defined consistently across all scripts
