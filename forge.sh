@@ -34,18 +34,21 @@ source "$FORGE_ROOT/scripts/common/dotfiles.sh"
 # forge install
 #
 # Behavior:
-#   forge install              -> full system install
+#   forge install              -> full system install (currently dotfiles)
+#   forge install --all        -> explicit full system install
 #   forge install --dotfiles   -> dotfiles only install
 forge_cmd_install() {
   local sub_arg="${1:-}"
 
   case "$sub_arg" in
-    --dotfiles)
+    ""|--all)
+        print_status "$BLUE" "Installing full system (dotfiles and other managed resources)..."
+        # For now, "full" means dotfiles; expand here as more components are added.
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
-    "")
-        print_status "$BLUE" "Installing full system (hook up your full installer here)."
-        # TODO: call your full system install function/script
+    --dotfiles)
+        print_status "$BLUE" "Installing dotfiles only..."
+        install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     *)
         print_status "$RED" "Unknown option for 'install': $sub_arg"
@@ -56,20 +59,22 @@ forge_cmd_install() {
   esac
 }
 forge_register_cmd "install" "Setup new system" forge_cmd_install
+forge_register_cmd_opt "install" "--all" "Install full system (dotfiles, etc.)"
 forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
 
 # forge update
 #
 # Behavior:
 #   forge update              -> run topgrade (system + tools update)
+#   forge update --all        -> full update (system + forge + dotfiles)
 #   forge update --self       -> update forge itself (repo + binary)
-#   forge update --dotfiles   -> update managed dotfiles (TODO)
+#   forge update --dotfiles   -> update managed dotfiles only
 forge_cmd_update() {
   local sub_arg="${1:-}"
 
   case "$sub_arg" in
     "")
-        # Default: delegate to topgrade if available
+        # Default: delegate to topgrade if available (system/tools only)
         if command -v topgrade >/dev/null 2>&1; then
             print_status "$BLUE" "Running topgrade to update system and tools..."
             topgrade
@@ -78,11 +83,25 @@ forge_cmd_update() {
             return 1
         fi
         ;;
+    --all)
+        # Full update: system + forge + dotfiles
+        if command -v topgrade >/dev/null 2>&1; then
+            print_status "$BLUE" "Running topgrade to update system and tools..."
+            topgrade
+        else
+            print_status "$YELLOW" "⚠️ 'topgrade' not found; skipping system/tools update."
+        fi
+        print_status "$BLUE" "Updating forge CLI and repository..."
+        update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH"
+        print_status "$BLUE" "Updating dotfiles..."
+        update_dotfiles "$DOTFILES_DIR" "$DOTFILES_BRANCH"
+        ;;
     --self)
         print_status "$BLUE" "Updating forge CLI and repository..."
         update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH"
         ;;
     --dotfiles)
+        print_status "$BLUE" "Updating dotfiles..."
         update_dotfiles "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     *)
@@ -94,26 +113,34 @@ forge_cmd_update() {
   esac
 }
 forge_register_cmd "update" "Update system, forge, and related resources" forge_cmd_update
+forge_register_cmd_opt "update" "--all" "Run full update (system, forge, and dotfiles)"
 forge_register_cmd_opt "update" "--self" "Update the forge CLI and repository"
-forge_register_cmd_opt "update" "--dotfiles" "Update managed dotfiles"
+forge_register_cmd_opt "update" "--dotfiles" "Update managed dotfiles only"
 forge_register_cmd_alias "up" "update"
 forge_register_cmd_alias "u" "update"
 
 # forge uninstall
+#
+# Behavior:
+#   forge uninstall           -> full uninstall (forge + dotfiles)
+#   forge uninstall --all     -> explicit full uninstall
+#   forge uninstall --self    -> uninstall forge CLI and data only
+#   forge uninstall --dotfiles-> uninstall managed dotfiles only
 forge_cmd_uninstall() {
   local sub_arg="${1:-}"
 
   case "$sub_arg" in
-    "")
-        print_status "$BLUE" "Please specify what to uninstall via a subcommand."
-        forge_print_help
-        return 1
+    ""|--all)
+        print_status "$BLUE" "Uninstalling forge CLI, data, and managed dotfiles..."
+        uninstall "$FORGE_BIN_PATH" "$FORGE_DATA_DIR"
+        uninstall_dotfiles "$DOTFILES_DIR"
         ;;
     --self)
         print_status "$BLUE" "Uninstalling forge CLI and repository..."
         uninstall "$FORGE_BIN_PATH" "$FORGE_DATA_DIR"
         ;;
     --dotfiles)
+        print_status "$BLUE" "Uninstalling managed dotfiles..."
         uninstall_dotfiles "$DOTFILES_DIR"
         ;;
     *)
@@ -124,7 +151,10 @@ forge_cmd_uninstall() {
         ;;
   esac
 }
-forge_register_cmd "uninstall" "Uninstall forge and its data" forge_cmd_uninstall
+forge_register_cmd "uninstall" "Uninstall forge and related resources" forge_cmd_uninstall
+forge_register_cmd_opt "uninstall" "--all" "Uninstall forge CLI, data, and dotfiles"
+forge_register_cmd_opt "uninstall" "--self" "Uninstall only the forge CLI and data"
+forge_register_cmd_opt "uninstall" "--dotfiles" "Uninstall managed dotfiles only"
 
 # forge help
 forge_cmd_help() {
