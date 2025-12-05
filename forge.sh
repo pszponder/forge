@@ -57,7 +57,7 @@ forge_cmd_install() {
   esac
 }
 forge_register_cmd "install" "Setup new system" forge_cmd_install
-forge_register_cmd_opt "install" "--all" "Install full system (dotfiles, etc.)"
+forge_register_cmd_opt "install" "--all" "Install full system (dotfiles, packages, etc.)"
 forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
 
 # forge update
