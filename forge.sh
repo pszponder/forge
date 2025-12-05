@@ -6,23 +6,23 @@ set -eEo pipefail
 # ----------------------
 # Resolve Forge root dir
 # ----------------------
-# When running from the repo, forge.sh lives in the repo root.
+# When running from the repo, forge.sh lives in the repo root (Forge root).
 # When installed, the forge binary is copied to ~/.local/bin, while the
-# cloned repo lives in ~/.local/share/forge. Prefer a nearby scripts/
-# directory, otherwise fall back to the data directory.
+# cloned repo lives in ~/.local/share/forge. Prefer a nearby config.sh,
+# otherwise fall back to the data directory.
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 FORGE_ROOT="$SCRIPT_DIR"
 
-if [[ ! -f "$FORGE_ROOT/scripts/config.sh" ]]; then
+if [[ ! -f "$FORGE_ROOT/config.sh" ]]; then
   # Likely running from the installed binary in ~/.local/bin
-  if [[ -f "$HOME/.local/share/forge/scripts/config.sh" ]]; then
+  if [[ -f "$HOME/.local/share/forge/config.sh" ]]; then
     FORGE_ROOT="$HOME/.local/share/forge"
   fi
 fi
 
 # Source Dependencies (always from the resolved Forge root)
 # shellcheck disable=SC1090
-source "$FORGE_ROOT/scripts/config.sh"
+source "$FORGE_ROOT/config.sh"
 # shellcheck disable=SC1090
 source "$FORGE_ROOT/scripts/utils/_utils.sh"
 
@@ -62,7 +62,7 @@ forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
 
 # forge uninstall
 forge_cmd_uninstall() {
-  uninstall
+  uninstall "$FORGE_BIN_PATH" "$FORGE_DATA_DIR"
 }
 forge_register_cmd "uninstall" "Uninstall forge and its data" forge_cmd_uninstall
 
@@ -88,7 +88,7 @@ forge_cmd_update() {
       ;;
     --self)
       print_status "$BLUE" "Updating forge CLI and repository..."
-      update
+      update "$FORGE_DATA_DIR" "$FORGE_BRANCH" "$FORGE_BIN_DIR" "$FORGE_BIN_PATH"
       ;;
     --dotfiles)
       print_status "$BLUE" "Updating dotfiles (TODO: implement dotfiles update logic)."

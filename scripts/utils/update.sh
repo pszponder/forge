@@ -4,14 +4,23 @@
 # Resolve paths relative to this file so it works from any CWD.
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1090
-source "${this_dir}/../config.sh"
-# shellcheck disable=SC1090
 source "${this_dir}/print_utils.sh"
 # shellcheck disable=SC1090
 source "${this_dir}/git_utils.sh"
 
+# update <repo_dir> <branch> <bin_dir> <bin_path>
+# All configuration is passed in explicitly by the caller instead of
+# being read from global variables.
 update() {
-    local repo_dir="$FORGE_DATA_DIR"
+    local repo_dir="$1"
+    local branch="$2"
+    local bin_dir="$3"
+    local bin_path="$4"
+
+    if [[ -z "$repo_dir" || -z "$branch" || -z "$bin_dir" || -z "$bin_path" ]]; then
+        print_status "$RED" "❌ update: missing arguments (repo_dir, branch, bin_dir, bin_path)."
+        return 1
+    fi
 
     # Check if forge is installed
     if [[ ! -d "$repo_dir" ]]; then
@@ -34,22 +43,22 @@ update() {
     fi
 
     # Checkout the branch
-    if ! git -C "$repo_dir" checkout "$FORGE_BRANCH" >/dev/null 2>&1; then
-        print_status "$RED" "❌ Failed to checkout branch: $FORGE_BRANCH"
+    if ! git -C "$repo_dir" checkout "$branch" >/dev/null 2>&1; then
+        print_status "$RED" "❌ Failed to checkout branch: $branch"
         return 1
     fi
 
     # Pull the latest changes
-    if ! git -C "$repo_dir" pull origin "$FORGE_BRANCH" >/dev/null 2>&1; then
+    if ! git -C "$repo_dir" pull origin "$branch" >/dev/null 2>&1; then
         print_status "$RED" "❌ Failed to pull latest changes."
         return 1
     fi
 
     # Copy the updated forge.sh to the binary location
-    if [[ -f "$repo_dir/forge.sh" && -d "$FORGE_BIN_DIR" ]]; then
-        cp "$repo_dir/forge.sh" "$FORGE_BIN_PATH"
-        chmod +x "$FORGE_BIN_PATH"
-        print_status "$GREEN" "✅ Updated forge binary at $FORGE_BIN_PATH."
+    if [[ -f "$repo_dir/forge.sh" && -d "$bin_dir" ]]; then
+        cp "$repo_dir/forge.sh" "$bin_path"
+        chmod +x "$bin_path"
+        print_status "$GREEN" "✅ Updated forge binary at $bin_path."
     else
         print_status "$YELLOW" "⚠️ Could not update forge binary (forge.sh or bin directory not found)."
     fi

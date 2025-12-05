@@ -3,9 +3,15 @@
 # Exit immediately if a command exits with a non-zero status
 set -eEo pipefail
 
-# Source Dependencies
-source ./scripts/config.sh
-source ./scripts/utils/_utils.sh
+# Resolve Forge root (this script lives in the repo or data root)
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+FORGE_ROOT="$SCRIPT_DIR"
+
+# Source shared configuration and dependencies
+# shellcheck disable=SC1090
+source "$FORGE_ROOT/config.sh"
+# shellcheck disable=SC1090
+source "$FORGE_ROOT/scripts/utils/_utils.sh"
 
 clear
 print_logo

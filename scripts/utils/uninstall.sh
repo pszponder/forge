@@ -4,25 +4,34 @@
 # Resolve paths relative to this file so it works from any CWD.
 this_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # shellcheck disable=SC1090
-source "${this_dir}/../config.sh"
-# shellcheck disable=SC1090
 source "${this_dir}/print_utils.sh"
 
+# uninstall <bin_path> <data_dir>
+# All configuration (paths, etc.) is passed in explicitly by the caller
+# (e.g., forge.sh) instead of being read from global variables.
 uninstall() {
+    local bin_path="$1"
+    local data_dir="$2"
+
+    if [[ -z "$bin_path" || -z "$data_dir" ]]; then
+        print_status "$RED" "❌ uninstall: missing arguments (bin_path, data_dir)."
+        return 1
+    fi
+
     # Remove forge binary
-    if [[ -f "$FORGE_BIN_PATH" ]]; then
-        rm "$FORGE_BIN_PATH"
-        print_status "$GREEN" "✅ Removed forge binary from $FORGE_BIN_PATH."
+    if [[ -f "$bin_path" ]]; then
+        rm "$bin_path"
+        print_status "$GREEN" "✅ Removed forge binary from $bin_path."
     else
-        print_status "$YELLOW" "⚠️ Forge binary not found at $FORGE_BIN_PATH."
+        print_status "$YELLOW" "⚠️ Forge binary not found at $bin_path."
     fi
 
     # Remove forge directory
-    if [[ -d "$FORGE_DATA_DIR" ]]; then
-        rm -rf "$FORGE_DATA_DIR"
-        print_status "$GREEN" "✅ Removed forge directory from $FORGE_DATA_DIR."
+    if [[ -d "$data_dir" ]]; then
+        rm -rf "$data_dir"
+        print_status "$GREEN" "✅ Removed forge directory from $data_dir."
     else
-        print_status "$YELLOW" "⚠️ Forge directory not found at $FORGE_DATA_DIR."
+        print_status "$YELLOW" "⚠️ Forge directory not found at $data_dir."
     fi
     print_status "$GREEN" "✅ Uninstallation complete."
 }
