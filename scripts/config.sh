@@ -10,4 +10,8 @@ export FORGE_DATA_DIR="${HOME}/.local/share/forge"
 export FORGE_REPO="pszponder/forge"
 export FORGE_BRANCH="main"
 
+# Dotfiles info
+export DOTFILES_REPO="pszponder/dotfiles"
+export DOTFILES_DIR="${HOME}/Development/repos/github/pszponder/dotfiles"
+
 # Ensure directories are defined consistently across all scripts
