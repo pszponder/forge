@@ -34,8 +34,6 @@ update() {
         return 1
     fi
 
-    print_status "$BLUE" "Updating forge repository..."
-
     # Fetch the latest changes
     if ! git -C "$repo_dir" fetch origin >/dev/null 2>&1; then
         print_status "$RED" "❌ Failed to fetch updates from remote."
