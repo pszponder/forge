@@ -53,7 +53,7 @@ forge update --self
     - [x] create a new SSH key
     - [ ] create a new GPG key
 - [ ] Try using VSCode plan mode when developing the tool
-- [ ] `forge setup` should ask what to install if no arguments are given
+- [x] `forge setup` should ask what to install if no arguments are given
 - [ ] `forge uninstall` should ask what to remove if no arguments are given
 - [x] `forge install` should be renamed to `forge setup`
 - [ ] `forge uninstall` should be renamed to `forge remove`

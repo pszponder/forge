@@ -190,7 +190,7 @@ forge_register_cmd_alias "n" "new"
 #
 # Behavior:
 #   forge uninstall             -> full uninstall of Forge and dotfiles (Homebrew untouched)
-#   forge uninstall --all       -> explicit full uninstall (Forge + dotfiles, Homebrew untouched)
+#   forge uninstall --all       -> interactive full uninstall (prompts for each option)
 #   forge uninstall --self      -> uninstall forge CLI and data only
 #   forge uninstall --dotfiles  -> uninstall managed dotfiles only
 #   forge uninstall --brew      -> uninstall Homebrew and all Homebrew-managed packages
@@ -199,14 +199,10 @@ forge_cmd_uninstall() {
 
   case "$sub_arg" in
     ""|--all)
-        print_status "$BLUE" "Uninstalling forge CLI, data, and managed dotfiles (Homebrew will be left installed)..."
-        read -rp "Are you sure you want to uninstall Forge and its dotfiles? This action cannot be undone. (y/N): " confirm
-        if [[ "$confirm" != "y" && "$confirm" != "Y" ]]; then
-            print_status "$YELLOW" "Uninstall cancelled."
-            return 0
-        fi
-        uninstall_dotfiles "$DOTFILES_DIR"
-        uninstall "$FORGE_BIN_PATH" "$FORGE_DATA_DIR"
+        # Interactive uninstall: prompt for each option
+        prompt_and_execute "Uninstall homebrew and all Homebrew-managed packages?" 'forge_brew_uninstall ""'
+        prompt_and_execute "Uninstall managed dotfiles?" 'uninstall_dotfiles "$DOTFILES_DIR"'
+        prompt_and_execute "Uninstall forge CLI and data?" 'uninstall "$FORGE_BIN_PATH" "$FORGE_DATA_DIR"'
         ;;
     --self)
         print_status "$BLUE" "Uninstalling forge CLI and repository..."
@@ -229,7 +225,7 @@ forge_cmd_uninstall() {
   esac
 }
 forge_register_cmd "uninstall" "Uninstall forge and related resources" forge_cmd_uninstall
-forge_register_cmd_opt "uninstall" "--all" "Uninstall forge CLI, data, and dotfiles (Homebrew left installed)"
+forge_register_cmd_opt "uninstall" "--all" "Interactive full uninstall (prompts for each option)"
 forge_register_cmd_opt "uninstall" "--self" "Uninstall only the forge CLI and data"
 forge_register_cmd_opt "uninstall" "--dotfiles" "Uninstall managed dotfiles only"
 forge_register_cmd_opt "uninstall" "--brew" "Uninstall Homebrew and all Homebrew-managed packages"
