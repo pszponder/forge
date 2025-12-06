@@ -93,6 +93,7 @@ forge_register_cmd_opt "setup" "--dotfiles" "Setup dotfiles only"
 forge_register_cmd_opt "setup" "--ssh" "Initialize SSH config and generate default SSH keys"
 forge_register_cmd_opt "setup" "--dirs" "Setup developer directories"
 forge_register_cmd_opt "setup" "--fonts" "Setup Nerd Fonts (Linux/macOS)"
+forge_register_cmd_alias "s" "setup"
 
 # forge update
 #
@@ -181,6 +182,7 @@ forge_cmd_new() {
 }
 forge_register_cmd "new" "Create new resources" forge_cmd_new
 forge_register_cmd_opt "new" "--ssh" "Create a new SSH key"
+forge_register_cmd_alias "n" "new"
 
 # forge uninstall
 #
