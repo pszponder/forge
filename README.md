@@ -74,11 +74,16 @@ forge update --self
     - [x] --ssh (to setup ssh keys and config)
     - [x] --dirs (default directory structure for a new system)
     - [x] --nerdfonts (only for linux systems)
+    - [ ] --mac
+    - [ ] --ubuntu
+    - [ ] --arch
+    - [ ] --fedora
+    - [ ] --fedora-atomic
 - [ ] add an "new" option
     - [x] create a new SSH key
     - [ ] create a new GPG key
-- [ ] Try using VSCode plan mode when developing the tool
-- [ ] `forge uninstall` should be renamed to `forge remove`
+- [x] Try using VSCode plan mode when developing the tool
+- [x] `forge uninstall` should be renamed to `forge remove`
 - [x] `forge setup` should ask what to install if no arguments are given
 - [x] `forge uninstall` should ask what to remove if no arguments are given
 - [x] `forge install` should be renamed to `forge setup`
