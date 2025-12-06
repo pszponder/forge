@@ -19,12 +19,15 @@ setup_nerdfonts() {
 
   # Predefined Nerd Fonts for macOS (Homebrew cask names)
   local FONTS_TO_INSTALL_MAC=(
-    "font-cascadia-code-nerd-font"
-    "font-cascadia-mono-nerd-font"
+    # "font-blex-mono-nerd-font"
+    "font-caskaydia-cove-nerd-font"
+    "font-caskaydia-mono-nerd-font"
     "font-fira-code-nerd-font"
+    "font-fira-mono-nerd-font"
     "font-hack-nerd-font"
     "font-jetbrains-mono-nerd-font"
     "font-meslo-lg-nerd-font"
+    # "font-terminess-ttf-nerd-font"
   )
 
   # -----------------------------
@@ -39,6 +42,12 @@ setup_nerdfonts() {
     fi
 
     print_status "$BLUE" "🔤 Installing select Nerd Fonts on macOS via Homebrew..."
+
+    # Ensure homebrew/cask-fonts is tapped (required to install font casks)
+    if ! brew tap | grep -q '^homebrew/cask-fonts$'; then
+      print_status "$YELLOW" "Tapping homebrew/cask-fonts..."
+      brew tap homebrew/cask-fonts
+    fi
 
     for cask in "${FONTS_TO_INSTALL_MAC[@]}"; do
       print_status "$BLUE" "Installing $cask..."
