@@ -12,9 +12,35 @@ A system configuration CLI tool
 **Optional (recommended)**:
 - `stow` (required if you plan on setting up dotfiles)
 
+### Install forge
+
+You can either clone and run the installer from a checked-out repository, or use the small remote bootstrapper which clones the repository and delegates to the normal installer.
+
+Recommended (explicit clone + run):
+
 ```sh
-git clone https://github.com/pszponder/forge.git
+git clone https://github.com/pszponder/forge.git ~/.local/share/forge
+bash ~/.local/share/forge/install.sh
 ```
+
+Remote bootstrapper (one-line):
+
+```sh
+curl -fsSL https://raw.githubusercontent.com/pszponder/forge/main/bootstrap.sh | bash
+```
+
+If you prefer to review the script before running it (recommended):
+
+```sh
+curl -fsSLo /tmp/forge-bootstrap.sh https://raw.githubusercontent.com/pszponder/forge/main/bootstrap.sh
+less /tmp/forge-bootstrap.sh
+bash /tmp/forge-bootstrap.sh
+```
+
+Note: the bootstrapper will remove and replace any existing installation at
+`$FORGE_DATA_DIR` (defaults to `~/.local/share/forge`). If you'd prefer to
+preserve an existing installation, set `FORGE_DATA_DIR` to a different path
+or manually back up the directory before running the bootstrapper.
 
 ## How to develop forge
 
@@ -46,7 +72,6 @@ forge update --self
     - [x] --brew
     - [ ] --flatpak
     - [x] --ssh (to setup ssh keys and config)
-    - [ ] --mise ???
     - [x] --dirs (default directory structure for a new system)
     - [x] --nerdfonts (only for linux systems)
 - [ ] add an "new" option
