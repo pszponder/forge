@@ -41,7 +41,7 @@ source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 #
 # Behavior:
 #   forge setup                -> full system setup (Homebrew + Brewfile + dotfiles)
-#   forge setup --all          -> explicit full system setup
+#   forge setup --all          -> interactive full system setup (prompts for each option)
 #   forge setup --brew         -> setup Homebrew and Brewfile packages only
 #   forge setup --dotfiles     -> dotfiles only setup
 #   forge setup --dirs         -> setup developer directories only
@@ -51,10 +51,12 @@ forge_cmd_setup() {
 
   case "$sub_arg" in
     ""|--all)
-        print_status "$BLUE" "Setting up dotfiles..."
-        install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
-        print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
-        forge_brew_install ""
+        # Interactive setup: prompt for each option
+        prompt_and_execute "Setup developer directories?" setup_dirs
+        prompt_and_execute "Setup SSH configuration and keys?" 'FORGE_SSH_NONINTERACTIVE=1 forge_setup_ssh_config; forge_setup_ssh_keys'
+        prompt_and_execute "Setup dotfiles?" 'install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"'
+        prompt_and_execute "Setup Homebrew and Brewfile packages?" 'forge_brew_install ""'
+        prompt_and_execute "Setup Nerd Fonts?" setup_nerdfonts
         ;;
     --brew)
         print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
@@ -87,7 +89,7 @@ forge_cmd_setup() {
   esac
 }
 forge_register_cmd "setup" "Setup new system" forge_cmd_setup
-forge_register_cmd_opt "setup" "--all" "Setup full system (Homebrew, Brewfile, dotfiles)"
+forge_register_cmd_opt "setup" "--all" "Interactive full system setup (prompts for each option)"
 forge_register_cmd_opt "setup" "--brew" "Setup Homebrew and Brewfile packages only"
 forge_register_cmd_opt "setup" "--dotfiles" "Setup dotfiles only"
 forge_register_cmd_opt "setup" "--ssh" "Initialize SSH config and generate default SSH keys"
