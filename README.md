@@ -45,7 +45,7 @@ forge update --self
 - [ ] add a "setup" option for
     - [x] --brew
     - [ ] --flatpak
-    - [ ] --ssh (to setup ssh keys and config)
+    - [x] --ssh (to setup ssh keys and config)
     - [ ] --mise ???
     - [ ] --dirs (default directory structure for a new system)
     - [ ] --nerdfonts (only for linux systems)
@@ -53,8 +53,8 @@ forge update --self
     - [ ] create a new SSH key
     - [ ] create a new GPG key
 - [ ] Try using VSCode plan mode when developing the tool
-- [ ] `forge install` should ask what to install if no arguments are given
+- [ ] `forge setup` should ask what to install if no arguments are given
 - [ ] `forge uninstall` should ask what to remove if no arguments are given
-- [ ] `forge install` should be renamed to `forge setup`
+- [x] `forge install` should be renamed to `forge setup`
 - [ ] `forge uninstall` should be renamed to `forge remove`
-- [ ] Add `forge add` to add new items such as ssh keys, gpg keys, etc.
+- [x] Add `forge add` (or `forge new`) to add new items such as ssh keys, gpg keys, etc.

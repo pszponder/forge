@@ -145,6 +145,29 @@ forge_register_cmd_opt "update" "--dotfiles" "Update managed dotfiles only"
 forge_register_cmd_alias "up" "update"
 forge_register_cmd_alias "u" "update"
 
+# forge new
+#
+# Behavior:
+#   forge new --ssh     -> create a new SSH key
+forge_cmd_new() {
+  local sub_arg="${1:-}"
+
+  case "$sub_arg" in
+    --ssh)
+        print_status "$BLUE" "Creating a new SSH key..."
+        bash "$FORGE_ROOT/scripts/common/ssh/sshkeygen.sh"
+        ;;
+    *)
+        print_status "$RED" "Unknown option for 'new': $sub_arg"
+        echo
+        forge_print_help
+        return 1
+        ;;
+  esac
+}
+forge_register_cmd "new" "Create new resources" forge_cmd_new
+forge_register_cmd_opt "new" "--ssh" "Create a new SSH key"
+
 # forge uninstall
 #
 # Behavior:
