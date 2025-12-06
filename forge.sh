@@ -25,6 +25,7 @@ source "$FORGE_ROOT/config.sh"
 source "$FORGE_ROOT/scripts/utils/_utils.sh"
 source "$FORGE_ROOT/scripts/common/dotfiles.sh"
 source "$FORGE_ROOT/scripts/common/homebrew/homebrew_lib.sh"
+source "$FORGE_ROOT/scripts/common/setup_dirs.sh"
 source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_config.sh"
 source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 
@@ -42,6 +43,7 @@ source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 #   forge setup --all          -> explicit full system setup
 #   forge setup --brew         -> setup Homebrew and Brewfile packages only
 #   forge setup --dotfiles     -> dotfiles only setup
+#   forge setup --dirs         -> setup developer directories only
 forge_cmd_setup() {
   local sub_arg="${1:-}"
 
@@ -55,6 +57,10 @@ forge_cmd_setup() {
     --brew)
         print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
         forge_brew_install ""
+        ;;
+    --dirs)
+        print_status "$BLUE" "Setting up developer directories..."
+        setup_dirs
         ;;
     --dotfiles)
         print_status "$BLUE" "Setting up dotfiles only..."
@@ -79,6 +85,7 @@ forge_register_cmd_opt "setup" "--all" "Setup full system (Homebrew, Brewfile, d
 forge_register_cmd_opt "setup" "--brew" "Setup Homebrew and Brewfile packages only"
 forge_register_cmd_opt "setup" "--dotfiles" "Setup dotfiles only"
 forge_register_cmd_opt "setup" "--ssh" "Initialize SSH config and generate default SSH keys"
+forge_register_cmd_opt "setup" "--dirs" "Setup developer directories"
 
 # forge update
 #

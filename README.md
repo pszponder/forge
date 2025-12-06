@@ -47,7 +47,7 @@ forge update --self
     - [ ] --flatpak
     - [x] --ssh (to setup ssh keys and config)
     - [ ] --mise ???
-    - [ ] --dirs (default directory structure for a new system)
+    - [x] --dirs (default directory structure for a new system)
     - [ ] --nerdfonts (only for linux systems)
 - [ ] add an "new" option
     - [ ] create a new SSH key
