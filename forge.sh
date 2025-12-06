@@ -25,6 +25,8 @@ source "$FORGE_ROOT/config.sh"
 source "$FORGE_ROOT/scripts/utils/_utils.sh"
 source "$FORGE_ROOT/scripts/common/dotfiles.sh"
 source "$FORGE_ROOT/scripts/common/homebrew/homebrew_lib.sh"
+source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_config.sh"
+source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 
 # --------------------------------------------------------------------------------------
 # Subcommand handlers
@@ -57,6 +59,12 @@ forge_cmd_install() {
         print_status "$BLUE" "Installing dotfiles only..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
+    --ssh)
+        print_status "$BLUE" "Initializing SSH configuration..."
+        FORGE_SSH_NONINTERACTIVE=1 forge_setup_ssh_config
+        print_status "$BLUE" "Creating default SSH keys..."
+        forge_setup_ssh_keys
+        ;;
     *)
         print_status "$RED" "Unknown option for 'install': $sub_arg"
         echo
@@ -69,6 +77,7 @@ forge_register_cmd "install" "Setup new system" forge_cmd_install
 forge_register_cmd_opt "install" "--all" "Install full system (Homebrew, Brewfile, dotfiles)"
 forge_register_cmd_opt "install" "--brew" "Install Homebrew and Brewfile packages only"
 forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
+forge_register_cmd_opt "install" "--ssh" "Initialize SSH config and generate default SSH keys"
 
 # forge update
 #
