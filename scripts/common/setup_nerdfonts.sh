@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 set -e
 
-setup_nerdfonts_linux() {
+setup_nerdfonts() {
   # Default version (Linux only)
   local NERD_FONTS_VERSION="${1:-v3.4.0}"
 
@@ -139,5 +139,5 @@ if [[ "${BASH_SOURCE[0]}" == "$0" ]]; then
         ;;
     esac
   done
-  setup_nerdfonts_linux "${VERSION:-}"
+  setup_nerdfonts "${VERSION:-}"
 fi

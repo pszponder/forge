@@ -26,7 +26,7 @@ source "$FORGE_ROOT/scripts/utils/_utils.sh"
 source "$FORGE_ROOT/scripts/common/dotfiles.sh"
 source "$FORGE_ROOT/scripts/common/homebrew/homebrew_lib.sh"
 source "$FORGE_ROOT/scripts/common/setup_dirs.sh"
-source "$FORGE_ROOT/scripts/common/setup_nerdfonts_linux.sh"
+source "$FORGE_ROOT/scripts/common/setup_nerdfonts.sh"
 source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_config.sh"
 source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 
@@ -69,8 +69,8 @@ forge_cmd_setup() {
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     --fonts)
-        print_status "$BLUE" "Setting up Nerd Fonts (Linux only)..."
-        setup_nerdfonts_linux
+        print_status "$BLUE" "Setting up Nerd Fonts..."
+        setup_nerdfonts
         ;;
     --ssh)
         print_status "$BLUE" "Initializing SSH configuration..."
