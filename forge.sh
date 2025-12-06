@@ -44,10 +44,10 @@ forge_cmd_install() {
 
   case "$sub_arg" in
     ""|--all)
-        print_status "$BLUE" "Installing Homebrew (if needed) and Brewfile packages..."
-        forge_brew_install ""
         print_status "$BLUE" "Installing dotfiles..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
+        print_status "$BLUE" "Installing Homebrew (if needed) and Brewfile packages..."
+        forge_brew_install ""
         ;;
     --brew)
         print_status "$BLUE" "Installing Homebrew (if needed) and Brewfile packages..."
