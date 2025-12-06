@@ -40,13 +40,21 @@ forge update --self
 - [ ] Tool should be modular and have options for:
     - [ ] Asking user for what os is being used
     - [ ] Asking user for what type of system (server or workstation)
-    - [ ] Installing packages
-    - [ ] Installing dotfiles
-    - [ ] Setup SSH Keys
+    - [x] Installing dotfiles
 - [ ] Can we replace Brew with Mise?
 - [ ] add a "setup" option for
-    - [ ] --brew
+    - [x] --brew
     - [ ] --flatpak
-    - [ ] --ssh
+    - [ ] --ssh (to setup ssh keys and config)
     - [ ] --mise ???
+    - [ ] --dirs (default directory structure for a new system)
+    - [ ] --nerdfonts (only for linux systems)
+- [ ] add an "new" option
+    - [ ] create a new SSH key
+    - [ ] create a new GPG key
 - [ ] Try using VSCode plan mode when developing the tool
+- [ ] `forge install` should ask what to install if no arguments are given
+- [ ] `forge uninstall` should ask what to remove if no arguments are given
+- [ ] `forge install` should be renamed to `forge setup`
+- [ ] `forge uninstall` should be renamed to `forge remove`
+- [ ] Add `forge add` to add new items such as ssh keys, gpg keys, etc.
