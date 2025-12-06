@@ -26,6 +26,7 @@ source "$FORGE_ROOT/scripts/utils/_utils.sh"
 source "$FORGE_ROOT/scripts/common/dotfiles.sh"
 source "$FORGE_ROOT/scripts/common/homebrew/homebrew_lib.sh"
 source "$FORGE_ROOT/scripts/common/setup_dirs.sh"
+source "$FORGE_ROOT/scripts/common/setup_nerdfonts_linux.sh"
 source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_config.sh"
 source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 
@@ -44,6 +45,7 @@ source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 #   forge setup --brew         -> setup Homebrew and Brewfile packages only
 #   forge setup --dotfiles     -> dotfiles only setup
 #   forge setup --dirs         -> setup developer directories only
+#   forge setup --fonts        -> setup Nerd Fonts only
 forge_cmd_setup() {
   local sub_arg="${1:-}"
 
@@ -66,6 +68,10 @@ forge_cmd_setup() {
         print_status "$BLUE" "Setting up dotfiles only..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
+    --fonts)
+        print_status "$BLUE" "Setting up Nerd Fonts (Linux only)..."
+        setup_nerdfonts_linux
+        ;;
     --ssh)
         print_status "$BLUE" "Initializing SSH configuration..."
         FORGE_SSH_NONINTERACTIVE=1 forge_setup_ssh_config
@@ -86,6 +92,7 @@ forge_register_cmd_opt "setup" "--brew" "Setup Homebrew and Brewfile packages on
 forge_register_cmd_opt "setup" "--dotfiles" "Setup dotfiles only"
 forge_register_cmd_opt "setup" "--ssh" "Initialize SSH config and generate default SSH keys"
 forge_register_cmd_opt "setup" "--dirs" "Setup developer directories"
+forge_register_cmd_opt "setup" "--fonts" "Setup Nerd Fonts (Linux/macOS)"
 
 # forge update
 #
