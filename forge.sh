@@ -34,29 +34,30 @@ source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 # Optionally register per-command options for help output (command, option, description)
 # --------------------------------------------------------------------------------------
 
-# forge install
+
+# forge setup
 #
 # Behavior:
-#   forge install                -> full system install (Homebrew + Brewfile + dotfiles)
-#   forge install --all          -> explicit full system install
-#   forge install --brew         -> install Homebrew and Brewfile packages only
-#   forge install --dotfiles     -> dotfiles only install
-forge_cmd_install() {
+#   forge setup                -> full system setup (Homebrew + Brewfile + dotfiles)
+#   forge setup --all          -> explicit full system setup
+#   forge setup --brew         -> setup Homebrew and Brewfile packages only
+#   forge setup --dotfiles     -> dotfiles only setup
+forge_cmd_setup() {
   local sub_arg="${1:-}"
 
   case "$sub_arg" in
     ""|--all)
-        print_status "$BLUE" "Installing dotfiles..."
+        print_status "$BLUE" "Setting up dotfiles..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
-        print_status "$BLUE" "Installing Homebrew (if needed) and Brewfile packages..."
+        print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
         forge_brew_install ""
         ;;
     --brew)
-        print_status "$BLUE" "Installing Homebrew (if needed) and Brewfile packages..."
+        print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
         forge_brew_install ""
         ;;
     --dotfiles)
-        print_status "$BLUE" "Installing dotfiles only..."
+        print_status "$BLUE" "Setting up dotfiles only..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     --ssh)
@@ -66,18 +67,18 @@ forge_cmd_install() {
         forge_setup_ssh_keys
         ;;
     *)
-        print_status "$RED" "Unknown option for 'install': $sub_arg"
+        print_status "$RED" "Unknown option for 'setup': $sub_arg"
         echo
         forge_print_help
         return 1
         ;;
   esac
 }
-forge_register_cmd "install" "Setup new system" forge_cmd_install
-forge_register_cmd_opt "install" "--all" "Install full system (Homebrew, Brewfile, dotfiles)"
-forge_register_cmd_opt "install" "--brew" "Install Homebrew and Brewfile packages only"
-forge_register_cmd_opt "install" "--dotfiles" "Install dotfiles only"
-forge_register_cmd_opt "install" "--ssh" "Initialize SSH config and generate default SSH keys"
+forge_register_cmd "setup" "Setup new system" forge_cmd_setup
+forge_register_cmd_opt "setup" "--all" "Setup full system (Homebrew, Brewfile, dotfiles)"
+forge_register_cmd_opt "setup" "--brew" "Setup Homebrew and Brewfile packages only"
+forge_register_cmd_opt "setup" "--dotfiles" "Setup dotfiles only"
+forge_register_cmd_opt "setup" "--ssh" "Initialize SSH config and generate default SSH keys"
 
 # forge update
 #
