@@ -141,6 +141,72 @@ checkout_git_branch() {
   fi
 }
 
+configure_path() {
+  local bin_dir="$1"
+
+  print_status "$YELLOW" "Configuring PATH to include $bin_dir..."
+
+  # Detect shell and appropriate config file
+  local shell_config=""
+  local current_shell="$(basename "$SHELL")"
+
+  case "$current_shell" in
+    zsh)
+      shell_config="$HOME/.zshrc"
+      ;;
+    bash)
+      # macOS uses .bash_profile, Linux typically uses .bashrc
+      if [[ "$(uname -s)" == "Darwin" ]]; then
+        shell_config="$HOME/.bash_profile"
+      else
+        shell_config="$HOME/.bashrc"
+      fi
+      ;;
+    fish)
+      shell_config="$HOME/.config/fish/config.fish"
+      ;;
+    *)
+      print_status "$YELLOW" "⚠️  Unknown shell: $current_shell"
+      print_status "$YELLOW" "Please manually add the following to your shell configuration:"
+      print_status "$BLUE" "    export PATH=\"$bin_dir:\$PATH\""
+      return 0
+      ;;
+  esac
+
+  # Check if PATH is already configured
+  if [[ -f "$shell_config" ]] && grep -q "$bin_dir" "$shell_config" 2>/dev/null; then
+    print_status "$GREEN" "✅ PATH already configured in $shell_config"
+    return 0
+  fi
+
+  # Add PATH configuration
+  local path_export
+  if [[ "$current_shell" == "fish" ]]; then
+    path_export="fish_add_path $bin_dir"
+  else
+    path_export="export PATH=\"$bin_dir:\$PATH\""
+  fi
+
+  # Create config file if it doesn't exist
+  if [[ ! -f "$shell_config" ]]; then
+    # For fish, create parent directory if needed
+    if [[ "$current_shell" == "fish" ]]; then
+      mkdir -p "$(dirname "$shell_config")"
+    fi
+    touch "$shell_config"
+  fi
+
+  # Add the export with a comment
+  {
+    echo ""
+    echo "# Added by Forge installer"
+    echo "$path_export"
+  } >> "$shell_config"
+
+  print_status "$GREEN" "✅ Added $bin_dir to PATH in $shell_config"
+  print_status "$YELLOW" "💡 Run 'source $shell_config' or restart your shell to use 'forge' command"
+}
+
 # Variables required for bootstrap mode
 # Centralized configuration for Forge runtime and installer.
 # Use env vars when provided by the caller, otherwise fall back to defaults.
@@ -189,4 +255,9 @@ mkdir -p "$FORGE_BIN_DIR"
 cp "$FORGE_DATA_DIR/forge.sh" "$FORGE_BIN_PATH"
 chmod +x "$FORGE_BIN_PATH"
 
+# Configure PATH
+configure_path "$FORGE_BIN_DIR"
+
 print_status "$GREEN" "✅ Forge installed successfully!"
+print_status "$BLUE" "To use forge immediately in this session, run:"
+print_status "$BLUE" "    export PATH=\"$FORGE_BIN_DIR:\$PATH\""

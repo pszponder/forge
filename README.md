@@ -77,4 +77,4 @@ forge update --self
 - [ ] add an "new" option
     - [ ] create a new GPG key
 - [ ] "forge setup" be reserved for setting up a new system and "forge install" to install smaller parts like fonts, dotfiles, etc.?
-- [ ]
+- [ ] Should `forge setup --common` include homebrew? Maybe remove --common and instead pass the setup into each specific os setup?
