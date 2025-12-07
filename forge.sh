@@ -57,21 +57,21 @@ forge_cmd_setup() {
         prompt_and_execute "Setup Homebrew and Brewfile packages?" 'forge_brew_install ""'
         prompt_and_execute "Setup Nerd Fonts?" setup_nerdfonts
         ;;
-    --common)
-        print_status "$BLUE" "Setting up common configuration..."
+    # --common)
+    #     print_status "$BLUE" "Setting up common configuration..."
 
-        print_status "$BLUE" "Setting up developer directories..."
-        setup_dirs
+    #     print_status "$BLUE" "Setting up developer directories..."
+    #     setup_dirs
 
-        print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
-        forge_brew_install ""
+    #     print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
+    #     forge_brew_install ""
 
-        print_status "$BLUE" "Setting up dotfiles..."
-        install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
+    #     print_status "$BLUE" "Setting up dotfiles..."
+    #     install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
 
-        print_status "$BLUE" "Setting up Nerd Fonts..."
-        setup_nerdfonts
-        ;;
+    #     print_status "$BLUE" "Setting up Nerd Fonts..."
+    #     setup_nerdfonts
+    #     ;;
     --arch)
         print_status "$BLUE" "Setting up Arch Linux specific configuration..."
         print_status "$YELLOW" "⚠️ Arch Linux specific setup is not yet implemented."
@@ -86,7 +86,11 @@ forge_cmd_setup() {
         ;;
     --mac)
         print_status "$BLUE" "Setting up macOS specific configuration..."
-        print_status "$YELLOW" "⚠️ macOS specific setup is not yet implemented."
+        setup_dirs
+        print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
+        forge_brew_install ""
+        print_status "$BLUE" "Setting up dotfiles..."
+        install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
         ;;
     --ubuntu)
         print_status "$BLUE" "Setting up Ubuntu specific configuration..."
@@ -124,7 +128,7 @@ forge_cmd_setup() {
 }
 forge_register_cmd "setup" "Setup new system" forge_cmd_setup
 forge_register_cmd_opt "setup" "--interactive" "Interactive full system setup (prompts for each option)"
-forge_register_cmd_opt "setup" "--common" "Full common setup (developer dirs, Homebrew & Brewfile, dotfiles, fonts)"
+# forge_register_cmd_opt "setup" "--common" "Full common setup (developer dirs, Homebrew & Brewfile, dotfiles, fonts)"
 forge_register_cmd_opt "setup" "--arch" "Arch Linux specific setup"
 forge_register_cmd_opt "setup" "--fedora" "Fedora specific setup"
 forge_register_cmd_opt "setup" "--fedora-atomic" "Fedora Atomic specific setup"
