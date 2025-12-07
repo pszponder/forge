@@ -182,13 +182,20 @@ else
 
         # Prompt for sudo upfront so credentials are cached for Homebrew installer
         echo -e "${YELLOW}Homebrew installation requires sudo access to create directories.${NC}"
-        sudo -v
+        sudo -v || { echo -e "${RED}Failed to obtain sudo credentials.${NC}"; exit 1; }
 
         # Keep sudo alive in the background during installation
         (while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null) &
         SUDO_KEEPALIVE_PID=$!
 
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo -e "${YELLOW}Installing Homebrew...${NC}"
+        if NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+            echo -e "${GREEN}Homebrew installation completed.${NC}"
+        else
+            echo -e "${RED}Homebrew installation failed.${NC}"
+            kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
+            exit 1
+        fi
 
         # Kill the sudo keep-alive process
         kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
@@ -197,9 +204,15 @@ else
 
         # Prompt for sudo upfront
         echo -e "${YELLOW}Homebrew installation requires sudo access.${NC}"
-        sudo -v
+        sudo -v || { echo -e "${RED}Failed to obtain sudo credentials.${NC}"; exit 1; }
 
-        NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+        echo -e "${YELLOW}Installing Homebrew...${NC}"
+        if NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"; then
+            echo -e "${GREEN}Homebrew installation completed.${NC}"
+        else
+            echo -e "${RED}Homebrew installation failed.${NC}"
+            exit 1
+        fi
     else
         echo -e "${RED}Unsupported OS: $OS${NC}"
         exit 1
