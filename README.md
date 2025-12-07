@@ -66,25 +66,15 @@ forge update --self
 - [ ] Tool should be modular and have options for:
     - [ ] Asking user for what os is being used
     - [ ] Asking user for what type of system (server or workstation)
-    - [x] Installing dotfiles
 - [ ] Can we replace Brew with Mise?
 - [ ] add a "setup" option for
-    - [x] --brew
     - [ ] --flatpak
-    - [x] --ssh (to setup ssh keys and config)
-    - [x] --dirs (default directory structure for a new system)
-    - [x] --nerdfonts (only for linux systems)
     - [ ] --mac
     - [ ] --ubuntu
     - [ ] --arch
     - [ ] --fedora
     - [ ] --fedora-atomic
 - [ ] add an "new" option
-    - [x] create a new SSH key
     - [ ] create a new GPG key
-- [x] Try using VSCode plan mode when developing the tool
-- [x] `forge uninstall` should be renamed to `forge remove`
-- [x] `forge setup` should ask what to install if no arguments are given
-- [x] `forge uninstall` should ask what to remove if no arguments are given
-- [x] `forge install` should be renamed to `forge setup`
-- [x] Add `forge add` (or `forge new`) to add new items such as ssh keys, gpg keys, etc.
+- [ ] "forge setup" be reserved for setting up a new system and "forge install" to install smaller parts like fonts, dotfiles, etc.?
+- [ ]

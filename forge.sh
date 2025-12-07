@@ -39,24 +39,58 @@ source "$FORGE_ROOT/scripts/common/ssh/setup_ssh_keys.sh"
 
 # forge setup
 #
-# Behavior:
-#   forge setup                -> full system setup (Homebrew + Brewfile + dotfiles)
-#   forge setup --all          -> interactive full system setup (prompts for each option)
-#   forge setup --brew         -> setup Homebrew and Brewfile packages only
-#   forge setup --dotfiles     -> dotfiles only setup
-#   forge setup --dirs         -> setup developer directories only
-#   forge setup --fonts        -> setup Nerd Fonts only
 forge_cmd_setup() {
   local sub_arg="${1:-}"
 
   case "$sub_arg" in
-    ""|--all)
+    "")
+        print_status "$YELLOW" "⚠️ Please provide a valid flag for the 'setup' command."
+        echo
+        forge_print_help
+        return 1
+        ;;
+    --interactive)
         # Interactive setup: prompt for each option
         prompt_and_execute "Setup developer directories?" setup_dirs
         prompt_and_execute "Setup SSH configuration and keys?" 'FORGE_SSH_NONINTERACTIVE=1 forge_setup_ssh_config; forge_setup_ssh_keys'
         prompt_and_execute "Setup dotfiles?" 'install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"'
         prompt_and_execute "Setup Homebrew and Brewfile packages?" 'forge_brew_install ""'
         prompt_and_execute "Setup Nerd Fonts?" setup_nerdfonts
+        ;;
+    --common)
+        print_status "$BLUE" "Setting up common configuration..."
+
+        print_status "$BLUE" "Setting up developer directories..."
+        setup_dirs
+
+        print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
+        forge_brew_install ""
+
+        print_status "$BLUE" "Setting up dotfiles..."
+        install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
+
+        print_status "$BLUE" "Setting up Nerd Fonts..."
+        setup_nerdfonts
+        ;;
+    --arch)
+        print_status "$BLUE" "Setting up Arch Linux specific configuration..."
+        print_status "$YELLOW" "⚠️ Arch Linux specific setup is not yet implemented."
+        ;;
+    --fedora)
+        print_status "$BLUE" "Setting up Fedora specific configuration..."
+        print_status "$YELLOW" "⚠️ Fedora specific setup is not yet implemented."
+        ;;
+    --fedora-atomic)
+        print_status "$BLUE" "Setting up Fedora Atomic specific configuration..."
+        print_status "$YELLOW" "⚠️ Fedora Atomic specific setup is not yet implemented."
+        ;;
+    --mac)
+        print_status "$BLUE" "Setting up macOS specific configuration..."
+        print_status "$YELLOW" "⚠️ macOS specific setup is not yet implemented."
+        ;;
+    --ubuntu)
+        print_status "$BLUE" "Setting up Ubuntu specific configuration..."
+        print_status "$YELLOW" "⚠️ Ubuntu specific setup is not yet implemented."
         ;;
     --brew)
         print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
@@ -89,7 +123,13 @@ forge_cmd_setup() {
   esac
 }
 forge_register_cmd "setup" "Setup new system" forge_cmd_setup
-forge_register_cmd_opt "setup" "--all" "Interactive full system setup (prompts for each option)"
+forge_register_cmd_opt "setup" "--interactive" "Interactive full system setup (prompts for each option)"
+forge_register_cmd_opt "setup" "--common" "Full common setup (developer dirs, Homebrew & Brewfile, dotfiles, fonts)"
+forge_register_cmd_opt "setup" "--arch" "Arch Linux specific setup"
+forge_register_cmd_opt "setup" "--fedora" "Fedora specific setup"
+forge_register_cmd_opt "setup" "--fedora-atomic" "Fedora Atomic specific setup"
+forge_register_cmd_opt "setup" "--mac" "macOS specific setup"
+forge_register_cmd_opt "setup" "--ubuntu" "Ubuntu specific setup"
 forge_register_cmd_opt "setup" "--brew" "Setup Homebrew and Brewfile packages only"
 forge_register_cmd_opt "setup" "--dotfiles" "Setup dotfiles only"
 forge_register_cmd_opt "setup" "--ssh" "Initialize SSH config and generate default SSH keys"
@@ -101,7 +141,6 @@ forge_register_cmd_alias "s" "setup"
 #
 # Behavior:
 #   forge update                -> run topgrade (system + tools update)
-#   forge update --all          -> full update (system + Homebrew + Forge + dotfiles)
 #   forge update --brew         -> update Homebrew and Brewfile packages only
 #   forge update --self         -> update forge itself (repo + binary)
 #   forge update --dotfiles     -> update managed dotfiles only
