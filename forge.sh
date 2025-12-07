@@ -89,8 +89,14 @@ forge_cmd_setup() {
         setup_dirs
         print_status "$BLUE" "Setting up Homebrew (if needed) and Brewfile packages..."
         forge_brew_install ""
+
         print_status "$BLUE" "Setting up dotfiles..."
         install_dotfiles "$DOTFILES_REPO" "$DOTFILES_DIR" "$DOTFILES_BRANCH"
+
+        print_status "$BLUE" "Initializing SSH configuration..."
+        FORGE_SSH_NONINTERACTIVE=1 forge_setup_ssh_config
+        print_status "$BLUE" "Creating default SSH keys..."
+        forge_setup_ssh_keys
         ;;
     --ubuntu)
         print_status "$BLUE" "Setting up Ubuntu specific configuration..."
