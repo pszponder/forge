@@ -12,12 +12,23 @@ install_dotfiles() {
     local branch="${DOTFILES_BRANCH:-main}"
 
     if [[ -d "$dest" ]]; then
+        print_status "$BLUE" "📂 Dotfiles already exist. Pulling latest changes..."
         git -C "$dest" pull origin "$branch"
         if [[ $? -ne 0 ]]; then
             print_status "$RED" "❌ Failed to update existing dotfiles repository."
             return 1
         fi
         print_status "$GREEN" "✅ Successfully updated existing dotfiles repository."
+
+        # Re-stow to ensure symlinks are current
+        print_status "$BLUE" "🔗 Re-creating symlinks for dotfiles using stow."
+        local stow_path="$(which stow)"
+        (cd "$dest" && "$stow_path" -R dots)
+        if [[ $? -ne 0 ]]; then
+            print_status "$RED" "❌ Failed to re-create symlinks for dotfiles."
+            return 1
+        fi
+        print_status "$GREEN" "✅ Successfully re-created symlinks for dotfiles."
     else
         print_status "$BLUE" "⬇️ Downloading dotfiles from $repo to $dest..."
         git clone "$repo" "$dest"
@@ -67,7 +78,7 @@ update_dotfiles() {
     # Use stow to re-create symlinks after update
     local stow_path="$(which stow)"
     print_status "$BLUE" "🔗 Re-creating symlinks for dotfiles using stow."
-    (cd "$dest" && "$stow_path" -D dots && "$stow_path" dots)
+    (cd "$dest" && "$stow_path" -R dots)
     if [[ $? -ne 0 ]]; then
         print_status "$RED" "❌ Failed to re-create symlinks for dotfiles after update."
         return 1
