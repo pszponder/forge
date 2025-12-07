@@ -31,10 +31,10 @@ install_dotfiles() {
         print_status "$GREEN" "✅ Successfully re-created symlinks for dotfiles."
     else
         print_status "$BLUE" "⬇️ Downloading dotfiles from $repo to $dest..."
-        git clone "$repo" "$dest"
+        git clone "https://github.com/${repo}.git" "$dest"
 
         # Change dotfiles remote URL to use SSH instead of HTTPS
-        git -C "$dest" remote set-url origin "git@github.com:${repo#https://github.com/}"
+        git -C "$dest" remote set-url origin "git@github.com:${repo}"
 
         if [[ $? -ne 0 ]]; then
             print_status "$RED" "❌ Failed to clone dotfiles repository."
