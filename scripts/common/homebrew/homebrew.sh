@@ -179,9 +179,26 @@ else
             echo "Please complete the installation of Command Line Tools and press Enter to continue."
             read -r
         fi
+
+        # Prompt for sudo upfront so credentials are cached for Homebrew installer
+        echo -e "${YELLOW}Homebrew installation requires sudo access to create directories.${NC}"
+        sudo -v
+
+        # Keep sudo alive in the background during installation
+        (while true; do sudo -n true; sleep 60; kill -0 "$$" || exit; done 2>/dev/null) &
+        SUDO_KEEPALIVE_PID=$!
+
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+
+        # Kill the sudo keep-alive process
+        kill "$SUDO_KEEPALIVE_PID" 2>/dev/null || true
     elif [[ "$OS" == "Linux" ]]; then
         install_linux_deps
+
+        # Prompt for sudo upfront
+        echo -e "${YELLOW}Homebrew installation requires sudo access.${NC}"
+        sudo -v
+
         NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
     else
         echo -e "${RED}Unsupported OS: $OS${NC}"
