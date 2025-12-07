@@ -49,6 +49,20 @@ cask "claude-code"
 brew "gemini-cli"
 brew "opencode"
 
+
+# Fonts
+# https://formulae.brew.sh/cask-font/
+# tap  "homebrew/cask-fonts"
+# cask "font-blex-mono-nerd-font"
+cask "font-caskaydia-cove-nerd-font"
+cask "font-caskaydia-mono-nerd-font"
+cask "font-fira-code-nerd-font"
+cask "font-fira-mono-nerd-font"
+cask "font-hack-nerd-font"
+cask "font-jetbrains-mono-nerd-font"
+cask "font-meslo-lg-nerd-font"
+# cask "font-terminess-ttf-nerd-font"
+
 ########################################
 #+ Platform-specific (leave as-is)
 ########################################
@@ -73,16 +87,4 @@ if OS.mac?
   cask "zed"
 
   cask "podman-desktop"
-
-  # https://formulae.brew.sh/cask-font/
-  tap  "homebrew/cask-fonts"
-  # cask "font-blex-mono-nerd-font"
-  cask "font-caskaydia-cove-nerd-font"
-  cask "font-caskaydia-mono-nerd-font"
-  cask "font-fira-code-nerd-font"
-  cask "font-fira-mono-nerd-font"
-  cask "font-hack-nerd-font"
-  cask "font-jetbrains-mono-nerd-font"
-  cask "font-meslo-lg-nerd-font"
-  # cask "font-terminess-ttf-nerd-font"
 end

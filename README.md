@@ -78,3 +78,4 @@ forge update --self
     - [ ] create a new GPG key
 - [ ] "forge setup" be reserved for setting up a new system and "forge install" to install smaller parts like fonts, dotfiles, etc.?
 - [ ] Should `forge setup --common` include homebrew? Maybe remove --common and instead pass the setup into each specific os setup?
+- [ ] Consider installing homebrew for all Linux/Mac workstations by default and use it to install fonts (don't forget to run fc-cache after font installation on Linux)
