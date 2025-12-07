@@ -119,10 +119,10 @@ if [[ -z "${FORGE_HOMEBREW_LIB_LOADED:-}" ]]; then
         _brew_print warn "If prompted, please complete the Command Line Tools installation. Press Enter to continue once done."
         read -r _
       fi
-      NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
     elif [[ "$os" == "Linux" ]]; then
       _brew_install_linux_deps || return 1
-      NONINTERACTIVE=1 /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
+      /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)" || return 1
     else
       _brew_print error "Unsupported OS for Homebrew: $os"
       return 1
